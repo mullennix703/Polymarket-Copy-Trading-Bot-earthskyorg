@@ -133,4 +133,6 @@ ISC License - See [LICENSE](LICENSE) file for details.
 - Uses [Predictfolio](https://predictfolio.com) for trader analytics
 - Powered by Polygon network
 
-**Support:** For questions or issues, contact via Telegram: [@earthskyorg](https://t.me/opensea712) | Twitter: [@earthskyorg](https://x.com/shinytechapes)
+---
+
+**Support:** For questions or issues, contact via Telegram: [Tech Genie](https://t.me/opensea712) | Twitter: [Tech Genie](https://x.com/shinytechapes)
