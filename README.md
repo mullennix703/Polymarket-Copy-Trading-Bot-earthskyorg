@@ -306,6 +306,10 @@ Yes! The bot supports:
 
 An advanced version with **Real-Time Data Stream (RTDS)** monitoring is available as a private repository.
 
+<img width="1900" height="909" alt="Screenshot_1" src="https://github.com/user-attachments/assets/c7383d27-7331-42f7-aa55-beb1fdf08373" />
+
+<img width="1904" height="909" alt="Screenshot_2" src="https://github.com/user-attachments/assets/651bcdb5-4aeb-4885-900d-23f7b5876d5d" />
+
 #### Enhanced Features
 
 - **Fastest Trade Detection**: Near-instantaneous trade replication
