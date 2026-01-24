@@ -98,12 +98,12 @@ export const performHealthCheck = async (): Promise<HealthCheckResult> => {
                 };
             }
         } else {
-            checks.balance = { status: 'error', message: 'Zero balance' };
+            checks.balance = { status: 'warning', message: 'Zero balance (Monitoring Mode)' };
         }
     } catch (error) {
         checks.balance = {
-            status: 'error',
-            message: `Balance check failed: ${error instanceof Error ? error.message : String(error)}`,
+            status: 'warning',
+            message: `Balance check failed: ${error instanceof Error ? error.message : String(error)} (Monitoring Mode ignored)`,
         };
     }
 
@@ -124,7 +124,7 @@ export const performHealthCheck = async (): Promise<HealthCheckResult> => {
     const healthy =
         checks.database.status === 'ok' &&
         checks.rpc.status === 'ok' &&
-        checks.balance.status !== 'error' &&
+        // checks.balance.status !== 'error' && // Ignored for monitoring mode
         checks.polymarketApi.status === 'ok';
 
     return {

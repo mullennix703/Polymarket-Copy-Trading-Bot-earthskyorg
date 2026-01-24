@@ -98,6 +98,10 @@ class Logger {
             const txUrl = `https://polygonscan.com/tx/${details.transactionHash}`;
             console.log(chalk.gray(`TX:     ${chalk.blue.underline(txUrl)}`));
         }
+        if (details.timestamp) {
+            const timeStr = new Date(details.timestamp).toLocaleString();
+            console.log(chalk.gray(`Time:   ${chalk.yellow(timeStr)}`));
+        }
         console.log(chalk.magenta('─'.repeat(70)) + '\n');
 
         // Log to file
@@ -147,18 +151,18 @@ class Logger {
             reset: '\x1b[0m',
             bold: '\x1b[1m',
             dim: '\x1b[2m',
-            
+
             // Primary brand colors
             cyan: '\x1b[38;5;51m',      // Bright cyan
             blue: '\x1b[38;5;39m',      // Electric blue
             purple: '\x1b[38;5;141m',   // Soft purple
             magenta: '\x1b[38;5;213m',  // Pink magenta
-            
+
             // Accent colors
             green: '\x1b[38;5;48m',     // Mint green
             yellow: '\x1b[38;5;221m',   // Warm yellow
             orange: '\x1b[38;5;215m',   // Soft orange
-            
+
             // UI colors
             gray: '\x1b[38;5;246m',     // Soft gray
             white: '\x1b[38;5;255m',    // Pure white

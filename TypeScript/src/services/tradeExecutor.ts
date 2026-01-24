@@ -183,6 +183,7 @@ const doTrading = async (clobClient: ClobClient, trades: TradeWithUser[]): Promi
             slug: trade.slug,
             eventSlug: trade.eventSlug,
             transactionHash: trade.transactionHash,
+            timestamp: trade.timestamp,
         });
 
         const my_positions: UserPositionInterface[] = await fetchData<UserPositionInterface[]>(
@@ -209,16 +210,18 @@ const doTrading = async (clobClient: ClobClient, trades: TradeWithUser[]): Promi
         Logger.balance(my_balance, user_balance, trade.userAddress);
 
         // Execute the trade
-        await postOrder(
-            clobClient,
-            trade.side === 'BUY' ? 'buy' : 'sell',
-            my_position,
-            user_position,
-            trade,
-            my_balance,
-            user_balance,
-            trade.userAddress
-        );
+        // await postOrder(
+        //     clobClient,
+        //     trade.side === 'BUY' ? 'buy' : 'sell',
+        //     my_position,
+        //     user_position,
+        //     trade,
+        //     my_balance,
+        //     user_balance,
+        //     trade.userAddress
+        // );
+
+        Logger.info('🔍 MONITOR MODE: Trade detected but not executed');
 
         Logger.separator();
     }
@@ -281,16 +284,18 @@ const doAggregatedTrading = async (
         };
 
         // Execute the aggregated trade
-        await postOrder(
-            clobClient,
-            agg.side === 'BUY' ? 'buy' : 'sell',
-            my_position,
-            user_position,
-            syntheticTrade,
-            my_balance,
-            user_balance,
-            agg.userAddress
-        );
+        // await postOrder(
+        //     clobClient,
+        //     agg.side === 'BUY' ? 'buy' : 'sell',
+        //     my_position,
+        //     user_position,
+        //     syntheticTrade,
+        //     my_balance,
+        //     user_balance,
+        //     agg.userAddress
+        // );
+
+        Logger.info('🔍 MONITOR MODE: Aggregated trade detected but not executed');
 
         Logger.separator();
     }

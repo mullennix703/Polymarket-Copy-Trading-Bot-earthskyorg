@@ -20,16 +20,8 @@ const validateConnectionString = (uri: string): void => {
         );
     }
 
-    // For mongodb+srv, check if it has proper format
-    if (uri.startsWith('mongodb+srv://')) {
-        // Should have format: mongodb+srv://[username:password@]host[/database][?options]
-        const srvPattern = /^mongodb\+srv:\/\/(?:([^:]+):([^@]+)@)?([^/]+)(?:\/([^?]+))?(?:\?(.+))?$/;
-        if (!srvPattern.test(uri)) {
-            throw new DatabaseError(
-                'Invalid MongoDB Atlas connection string format. Expected: mongodb+srv://username:password@cluster.mongodb.net/database'
-            );
-        }
-    }
+    // Validation simplified: rely on Mongoose driver to validate connection string details
+    // The previous regex was too strict and rejected valid URIs without explicit database names
 };
 
 /**
