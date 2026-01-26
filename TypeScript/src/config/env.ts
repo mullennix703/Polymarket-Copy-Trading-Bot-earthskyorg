@@ -23,6 +23,13 @@ const KNOWN_TRADERS: string[] = [
     '0x75e765216a57942d738d880ffcda854d9f869080', // 25usdc
     '0xd3989ba133ab48b5b3a81e3dba9b37b5966a46d7', // semi
     '0x9c5455d1ff77d42fd093511a2e3a5d3d53f8a525', // cramschool
+    '0xf2f6af4f27ec2dcf4072095ab804016e14cd5817', // gopfan2
+    '0x594edb9112f526fa6a80b8f858a6379c8a2c1c11', // 0x594edb9112f526fa6a80b8f858a6379c8a2c1c11
+    '0x9977760c6bd6f824cac834d1a36ee99478d63020', // meropi
+    '0xbdcd1a99e6880b8146f61323dcb799bb5b243e9c', // 1pixel
+    '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', // Hans323
+    '0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11', // automatedAItradingbot
+    '0x9d3e989dd42030664e6157dae42f6d549542c49e', // 0x9d3e989dd42030664e6157dae42f6d549542c49e
 ];
 
 /**
