@@ -4,6 +4,26 @@ import { ConfigurationError } from '../utils/errors';
 dotenv.config();
 
 /**
+ * Hardcoded list of known traders to monitor
+ * Comment/uncomment addresses to enable/disable tracking specific traders
+ */
+const KNOWN_TRADERS: string[] = [
+    '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', // kch123
+    '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', // Car
+    '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', // Dropper
+    '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', // HolyMoses7
+    // '0x8545ff3521691618f2d5e4f5460d76186a5023be', // 1KChallenge
+    '0x751a2b86cab503496efd325c8344e10159349ea1', // Sharky6999
+    // '0x134240c2a99fa2a1cd9db6fc2caa65043259c997', // 1j59y6nk
+    '0xfeb581080aee6dc26c264a647b30a9cd44d5a393', // completion
+    '0xe3726a1b9c6ba2f06585d1c9e01d00afaedaeb38', // cry.eth2
+    '0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1', // aenews2
+    '0x4959175440b8f38229b32f2f036057f6893ea6f5', // Majas
+    // '0x5bffcf561bcae83af680ad600cb99f1184d6ffbe', // YatSen
+    '0x75e765216a57942d738d880ffcda854d9f869080', // 25usdc
+];
+
+/**
  * Validate Ethereum address format
  */
 const isValidEthereumAddress = (address: string): boolean => {
@@ -14,8 +34,8 @@ const isValidEthereumAddress = (address: string): boolean => {
  * Validate required environment variables
  */
 const validateRequiredEnv = (): void => {
+    // USER_ADDRESSES is now hardcoded in KNOWN_TRADERS, no longer required in .env
     const required = [
-        'USER_ADDRESSES',
         'PROXY_WALLET',
         'PRIVATE_KEY',
         'CLOB_HTTP_URL',
@@ -230,9 +250,9 @@ const parseUserAddresses = (input: string): string[] => {
             console.error('   • Polymarket Leaderboard: https://polymarket.com/leaderboard');
             console.error('   • Predictfolio: https://predictfolio.com\n');
             console.error('Example: USER_ADDRESSES=\'0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b\'\n');
-                        throw new ConfigurationError(
-                            `Invalid Ethereum address in USER_ADDRESSES: ${addr}`
-                        );
+            throw new ConfigurationError(
+                `Invalid Ethereum address in USER_ADDRESSES: ${addr}`
+            );
         }
     }
     return addresses;
@@ -334,7 +354,9 @@ const parseCopyStrategy = (): CopyStrategyConfig => {
 };
 
 export const ENV = {
-    USER_ADDRESSES: parseUserAddresses(process.env.USER_ADDRESSES as string),
+    // Use hardcoded KNOWN_TRADERS list instead of .env
+    // To modify tracked traders, edit the KNOWN_TRADERS array at the top of this file
+    USER_ADDRESSES: KNOWN_TRADERS.map(addr => addr.toLowerCase()),
     PROXY_WALLET: process.env.PROXY_WALLET as string,
     PRIVATE_KEY: process.env.PRIVATE_KEY as string,
     CLOB_HTTP_URL: process.env.CLOB_HTTP_URL as string,
