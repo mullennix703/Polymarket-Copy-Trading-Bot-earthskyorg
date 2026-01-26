@@ -21,6 +21,8 @@ const KNOWN_TRADERS: string[] = [
     '0x4959175440b8f38229b32f2f036057f6893ea6f5', // Majas
     // '0x5bffcf561bcae83af680ad600cb99f1184d6ffbe', // YatSen
     '0x75e765216a57942d738d880ffcda854d9f869080', // 25usdc
+    '0xd3989ba133ab48b5b3a81e3dba9b37b5966a46d7', // semi
+    '0x9c5455d1ff77d42fd093511a2e3a5d3d53f8a525', // cramschool
 ];
 
 /**
