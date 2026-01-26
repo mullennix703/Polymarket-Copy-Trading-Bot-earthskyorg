@@ -99,7 +99,9 @@ class Logger {
             console.log(chalk.gray(`TX:     ${chalk.blue.underline(txUrl)}`));
         }
         if (details.timestamp) {
-            const timeStr = new Date(details.timestamp).toLocaleString();
+            // Polymarket API returns Unix timestamp in seconds, convert to milliseconds
+            const timestampMs = details.timestamp * 1000;
+            const timeStr = new Date(timestampMs).toLocaleString();
             console.log(chalk.gray(`Time:   ${chalk.yellow(timeStr)}`));
         }
         console.log(chalk.magenta('─'.repeat(70)) + '\n');
