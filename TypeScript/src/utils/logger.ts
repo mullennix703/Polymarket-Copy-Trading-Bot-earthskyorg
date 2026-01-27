@@ -98,11 +98,30 @@ class Logger {
             const txUrl = `https://polygonscan.com/tx/${details.transactionHash}`;
             console.log(chalk.gray(`TX:     ${chalk.blue.underline(txUrl)}`));
         }
+        // Print trade time, current time, and latency
+        const now = Date.now();
+        const nowStr = new Date(now).toLocaleString();
+
         if (details.timestamp) {
             // Polymarket API returns Unix timestamp in seconds, convert to milliseconds
             const timestampMs = details.timestamp * 1000;
             const timeStr = new Date(timestampMs).toLocaleString();
-            console.log(chalk.gray(`Time:   ${chalk.yellow(timeStr)}`));
+            const latencyMs = now - timestampMs;
+            const latencySeconds = (latencyMs / 1000).toFixed(1);
+
+            console.log(chalk.gray(`Trade Time: ${chalk.yellow(timeStr)}`));
+            console.log(chalk.gray(`Print Time: ${chalk.cyan(nowStr)}`));
+
+            // Color-code latency: green (<30s), yellow (30-60s), red (>60s)
+            let latencyColor = chalk.green;
+            if (latencyMs > 60000) {
+                latencyColor = chalk.red;
+            } else if (latencyMs > 30000) {
+                latencyColor = chalk.yellow;
+            }
+            console.log(chalk.gray(`Latency:    ${latencyColor.bold(`${latencySeconds}s`)}`));
+        } else {
+            console.log(chalk.gray(`Print Time: ${chalk.cyan(nowStr)}`));
         }
         console.log(chalk.magenta('─'.repeat(70)) + '\n');
 

@@ -30,6 +30,10 @@ const KNOWN_TRADERS: string[] = [
     '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', // Hans323
     '0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11', // automatedAItradingbot
     '0x9d3e989dd42030664e6157dae42f6d549542c49e', // 0x9d3e989dd42030664e6157dae42f6d549542c49e
+    '0x6297b93ea37ff92a57fd636410f3b71ebf74517e', // neobrother
+    '0xb43699cbbb52520952833c10737bc43e7625bb3c', // DOJ
+    '0x3b7ed1242417f4b8f6992b5dd53aa9415a2c23eb', // phdcapital
+    '0x0b219cf3d297991b58361dbebdbaa91e56b8deb6', // TerreMoto
 ];
 
 /**
