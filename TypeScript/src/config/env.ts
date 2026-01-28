@@ -34,6 +34,36 @@ const KNOWN_TRADERS: string[] = [
     '0xb43699cbbb52520952833c10737bc43e7625bb3c', // DOJ
     '0x3b7ed1242417f4b8f6992b5dd53aa9415a2c23eb', // phdcapital
     '0x0b219cf3d297991b58361dbebdbaa91e56b8deb6', // TerreMoto
+    '0x589222a5124a96765443b97a3498d89ffd824ad2', // PurpleThunderBicycleMountain
+    '0x1f0a343513aa6060488fabe96960e6d1e177f7aa', // archaic
+    '0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f', // 0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f
+    '0xe00740bce98a594e26861838885ab310ec3b548c', // distinct-baguette
+    '0x01542a212c9696da5b409cae879143b8966115a8', // 0x01542a212c9696da5b409cae879143b89661
+    '0x090a0d3fc9d68d3e16db70e3460e3e4b510801b4', // slight-
+    '0x6baf05d193692bb208d616709e27442c910a94c5', // SBet365
+    '0x6d7776a0f954be1a7c975a1e8244de6268f7b72c', // humanbeans
+    '0xb6bed94e75c333dae24eb9c80b3fef47ef3cfcfe', // DickTurbin
+    '0x79add3f87e377b0899b935472c07d2c3816ba9f1', // lmtfalone
+    '0x858d551d073e9c647c17079ad9021de830201047', // flipfloppity
+    '0x961afce6bd9aec79c5cf09d2d4dac2b434b23361', // CRYINGLITTLEBABY
+    '0x1ff49fdcb6685c94059b65620f43a683be0ce7a5', // ca6859f3c004bff161e3328d27ddba6c
+    '0x818f214c7f3e479cce1d964d53fe3db7297558cb', // livebreathevolatility
+    '0xf247584e41117bbbe4cc06e4d2c95741792a5216', // 0xf247584e41117bbBe4Cc06E4d2C95741792a5216
+    '0x63ce342161250d705dc0b16df89036c8e5f9ba9a', // 0x8dxd
+    '0x000d257d2dc7616feaef4ae0f14600fdf50a758e', // scottilicious
+    '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', // ImJustKen
+    '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', // crispy-avocado
+    '0xa9878e59934ab507f9039bcb917c1bae0451141d', // ilovecircle
+    '0x336848a1a1cb00348020c9457676f34d882f21cd', // 0x336848A1A1cb00348020c9457676F34d882F21Cd
+    '0x22e4248bdb066f65c9f11cd66cdd3719a28eef1c', // ProfessionalPunter
+    '0xcc500cbcc8b7cf5bd21975ebbea34f21b5644c82', // justdance
+    '0x55be7aa03ecfbe37aa5460db791205f7ac9ddca3', // coinman2
+    '0xe9c6312464b52aa3eff13d822b003282075995c9', // kingofcoinflips
+    '0x6031b6eed1c97e853c6e0f03ad3ce3529351f96d', // gabagool22
+    '0x71a70f24538d885d1b45f9cea158a2cdf2e56fcf', // easyclap
+    '0xa2f1fecf1cc7db65a46588f764b6691533052d22', // elPolloLoco
+    '0x16b29c50f2439faf627209b2ac0c7bbddaa8a881', // SeriouslySirius
+    '0x4b92a2d2fd3807981a5dddae7315122530a542e6', // wisser
 ];
 
 /**

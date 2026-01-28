@@ -133,8 +133,12 @@ const fetchTradeData = async (): Promise<void> => {
 
             // Process each activity
             for (const activity of activities) {
+                // Calculate cutoff timestamp (current time - TOO_OLD_TIMESTAMP hours)
+                const currentUnix = Math.floor(Date.now() / 1000);
+                const cutoffTimestamp = currentUnix - (TOO_OLD_TIMESTAMP * 3600);
+
                 // Skip if too old
-                if (activity.timestamp < TOO_OLD_TIMESTAMP) {
+                if (activity.timestamp < cutoffTimestamp) {
                     continue;
                 }
 
@@ -175,7 +179,9 @@ const fetchTradeData = async (): Promise<void> => {
                 });
 
                 await newActivity.save();
-                Logger.info(`New trade detected for ${address.slice(0, 6)}...${address.slice(-4)}`);
+                const now = Date.now();
+                const latency = ((now - activity.timestamp * 1000) / 1000).toFixed(1);
+                Logger.info(`[${new Date(now).toLocaleString()}] New trade detected for ${address.slice(0, 6)}...${address.slice(-4)} (Latency: ${latency}s)`);
             }
 
             // Also fetch and update positions
