@@ -64,6 +64,10 @@ const KNOWN_TRADERS: string[] = [
     '0xa2f1fecf1cc7db65a46588f764b6691533052d22', // elPolloLoco
     '0x16b29c50f2439faf627209b2ac0c7bbddaa8a881', // SeriouslySirius
     '0x4b92a2d2fd3807981a5dddae7315122530a542e6', // wisser
+    '0x961afce6bd9aec79c5cf09d2d4dac2b434b23361', // CRYINGLITTLEBABY
+    '0xe9c6312464b52aa3eff13d822b003282075995c9', // kingofcoinflips
+    '0x89e75fd541c6cb6549f13e98c78b971c8f3e50e9', // ClaudeAI
+    '0x204f72f35326db932158cba6adff0b9a1da95e14', // swisstony
 ];
 
 /**
