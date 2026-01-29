@@ -228,8 +228,8 @@ const processTrader = async (
                 }
             }
         })
-        .catch(() => {
-            // Silently ignore position update errors
+        .catch((error) => {
+            Logger.warning(`Position update failed for ${address.slice(0, 6)}...${address.slice(-4)}: ${error}`);
         });
 };
 
