@@ -95,6 +95,45 @@ export function isOperationalError(error: unknown): boolean {
     if (error instanceof AppError) {
         return error.isOperational;
     }
+    
+    // Treat MongoDB and network connection errors as operational (recoverable)
+    if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        
+        // MongoDB connection errors
+        const isMongoConnectionError = 
+            message.includes('connection') && (
+                message.includes('closed') ||
+                message.includes('disconnected') ||
+                message.includes('timeout') ||
+                message.includes('econnrefused') ||
+                message.includes('econnreset') ||
+                message.includes('socket hang up')
+            );
+        
+        // Network/fetch errors
+        const isNetworkError = 
+            message.includes('econnrefused') ||
+            message.includes('econnreset') ||
+            message.includes('etimedout') ||
+            message.includes('enotfound') ||
+            message.includes('socket hang up') ||
+            message.includes('network') ||
+            message.includes('fetch failed');
+        
+        // Mongoose/MongoDB specific errors
+        const isMongooseError =
+            message.includes('buffering timed out') ||
+            message.includes('topology was destroyed') ||
+            message.includes('server selection timed out') ||
+            message.includes('mongonetworkerror') ||
+            message.includes('connection') && message.includes('27017');
+        
+        if (isMongoConnectionError || isNetworkError || isMongooseError) {
+            return true; // Don't crash on these recoverable errors
+        }
+    }
+    
     return false;
 }
 

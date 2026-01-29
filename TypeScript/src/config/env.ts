@@ -54,7 +54,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x1ff49fdcb6685c94059b65620f43a683be0ce7a5', name: 'ca6859f3c004bff' },
     { address: '0x818f214c7f3e479cce1d964d53fe3db7297558cb', name: 'livebreathevolatility' },
     { address: '0xf247584e41117bbbe4cc06e4d2c95741792a5216', name: '0xf247...a5216' },
-    { address: '0x63ce342161250d705dc0b16df89036c8e5f9ba9a', name: '0x8dxd' },
+    { address: '0x63ce342161250d705dc0b16df89036c8e5f9ba9a', name: '0x8dxd' }, //UpDown
     { address: '0x000d257d2dc7616feaef4ae0f14600fdf50a758e', name: 'scottilicious' },
     { address: '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', name: 'ImJustKen' },
     { address: '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', name: 'crispy-avocado' },
@@ -64,7 +64,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xcc500cbcc8b7cf5bd21975ebbea34f21b5644c82', name: 'justdance' },
     { address: '0x55be7aa03ecfbe37aa5460db791205f7ac9ddca3', name: 'coinman2' },
     { address: '0xe9c6312464b52aa3eff13d822b003282075995c9', name: 'kingofcoinflips' },
-    { address: '0x6031b6eed1c97e853c6e0f03ad3ce3529351f96d', name: 'gabagool22' },
+    { address: '0x6031b6eed1c97e853c6e0f03ad3ce3529351f96d', name: 'gabagool22' }, //UpDown
     { address: '0x71a70f24538d885d1b45f9cea158a2cdf2e56fcf', name: 'easyclap' },
     { address: '0xa2f1fecf1cc7db65a46588f764b6691533052d22', name: 'elPolloLoco' },
     { address: '0x16b29c50f2439faf627209b2ac0c7bbddaa8a881', name: 'SeriouslySirius' },

@@ -106,12 +106,14 @@ const connectDB = async (): Promise<void> => {
     // Connection options for MongoDB Atlas
     const connectionOptions: mongoose.ConnectOptions = {
         serverSelectionTimeoutMS: 30000, // 30 seconds timeout for server selection
-        socketTimeoutMS: 45000, // 45 seconds timeout for socket operations
+        socketTimeoutMS: 0, // Disable socket timeout to prevent disconnects during long operations
         connectTimeoutMS: 30000, // 30 seconds timeout for initial connection
         retryWrites: true, // Enable retry writes
         retryReads: true, // Enable retry reads
         maxPoolSize: 10, // Maximum number of connections in the pool
         minPoolSize: 2, // Minimum number of connections in the pool
+        // Heartbeat settings to keep connection alive
+        heartbeatFrequencyMS: 10000, // Send heartbeat every 10 seconds
         // For MongoDB Atlas, these options help with connection stability
         ...(uri.startsWith('mongodb+srv://') && {
             // Additional options for SRV connections
@@ -119,6 +121,23 @@ const connectDB = async (): Promise<void> => {
             tlsAllowInvalidCertificates: false, // Don't allow invalid certificates
         }),
     };
+
+    // Set up connection event listeners for auto-reconnect and monitoring
+    mongoose.connection.on('disconnected', () => {
+        console.log(chalk.yellow('⚠'), 'MongoDB disconnected. Driver will attempt to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+        console.log(chalk.green('✓'), 'MongoDB reconnected successfully');
+    });
+
+    mongoose.connection.on('error', (err) => {
+        console.log(chalk.red('✗'), 'MongoDB connection error:', err.message);
+    });
+
+    mongoose.connection.on('close', () => {
+        console.log(chalk.yellow('⚠'), 'MongoDB connection closed');
+    });
 
     let retries = 3;
     let lastError: unknown;

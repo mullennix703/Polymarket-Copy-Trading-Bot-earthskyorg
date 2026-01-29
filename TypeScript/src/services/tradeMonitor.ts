@@ -295,45 +295,127 @@ export const stopTradeMonitor = (): void => {
 /**
  * Main trade monitor function
  * Monitors traders for new trades and updates database
+ * 
+ * IMPORTANT: This function now waits for historical sync to complete
+ * before starting the monitoring loop. The caller should await this
+ * function to ensure historical trades are synced before starting
+ * the trade executor.
  */
 const tradeMonitor = async (): Promise<void> => {
     await init();
     Logger.success(`Monitoring ${USER_ADDRESSES.length} trader(s) every ${FETCH_INTERVAL}s`);
     Logger.separator();
 
-    // On first run, mark all existing historical trades as already processed
+    // On first run, fetch and mark all existing historical trades as already processed
+    // This MUST complete BEFORE the trade executor starts to avoid processing old trades
     if (isFirstRun) {
-        Logger.info('First run: marking all historical trades as processed...');
+        Logger.info('Syncing historical trades (this prevents old trades from being executed)...');
+        
+        // Fetch all current trades from API and save them as already processed
         for (const { address, UserActivity } of userModels) {
-            const count = await UserActivity.updateMany(
-                { [DB_FIELDS.BOT_EXECUTED]: false },
-                {
-                    $set: {
-                        [DB_FIELDS.BOT_EXECUTED]: true,
-                        [DB_FIELDS.BOT_EXECUTED_TIME]: 999,
-                    },
+            try {
+                const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
+                const activities = await fetchData<UserActivityInterface[]>(apiUrl);
+                
+                if (Array.isArray(activities) && activities.length > 0) {
+                    const currentUnix = Math.floor(Date.now() / 1000);
+                    const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
+                    
+                    let savedCount = 0;
+                    for (const activity of activities) {
+                        if (activity.timestamp < cutoffTimestamp) continue;
+                        
+                        const existingActivity = await UserActivity.findOne({
+                            transactionHash: activity.transactionHash,
+                        }).exec();
+                        
+                        if (!existingActivity) {
+                            const newActivity = new UserActivity({
+                                proxyWallet: activity.proxyWallet,
+                                timestamp: activity.timestamp,
+                                conditionId: activity.conditionId,
+                                type: activity.type,
+                                size: activity.size,
+                                usdcSize: activity.usdcSize,
+                                transactionHash: activity.transactionHash,
+                                price: activity.price,
+                                asset: activity.asset,
+                                side: activity.side,
+                                outcomeIndex: activity.outcomeIndex,
+                                title: activity.title,
+                                slug: activity.slug,
+                                icon: activity.icon,
+                                eventSlug: activity.eventSlug,
+                                outcome: activity.outcome,
+                                name: activity.name,
+                                pseudonym: activity.pseudonym,
+                                bio: activity.bio,
+                                profileImage: activity.profileImage,
+                                profileImageOptimized: activity.profileImageOptimized,
+                                bot: true,  // Mark as already processed
+                                botExcutedTime: 999,  // Mark as historical
+                            });
+                            await newActivity.save();
+                            savedCount++;
+                        }
+                    }
+                    
+                    if (savedCount > 0) {
+                        Logger.info(
+                            `Synced ${savedCount} historical trades for ${address.slice(0, 6)}...${address.slice(-4)}`
+                        );
+                    }
                 }
-            );
-            if (count.modifiedCount > 0) {
-                Logger.info(
-                    `Marked ${count.modifiedCount} historical trades as processed for ${address.slice(0, 6)}...${address.slice(-4)}`
-                );
+            } catch (error) {
+                Logger.warning(`Failed to sync historical trades for ${address.slice(0, 6)}...${address.slice(-4)}`);
             }
         }
+        
+        // Also mark any existing unprocessed trades in DB
+        for (const { address, UserActivity } of userModels) {
+            try {
+                await UserActivity.updateMany(
+                    { [DB_FIELDS.BOT_EXECUTED]: false },
+                    {
+                        $set: {
+                            [DB_FIELDS.BOT_EXECUTED]: true,
+                            [DB_FIELDS.BOT_EXECUTED_TIME]: 999,
+                        },
+                    }
+                );
+            } catch (error) {
+                // Ignore DB errors during initialization
+            }
+        }
+        
         isFirstRun = false;
-        Logger.success('\nHistorical trades processed. Now monitoring for new trades only.');
+        Logger.success('Historical trades synced. Trade executor can now safely start.');
         Logger.separator();
     }
 
-    while (isRunning) {
-        await fetchTradeData();
-        if (!isRunning) break;
-        await new Promise((resolve) =>
-            setTimeout(resolve, FETCH_INTERVAL * TIME_CONSTANTS.SECOND_MS)
-        );
-    }
+    // Start monitoring loop in the background (non-blocking)
+    // The historical sync above is complete, so executor can safely start
+    setImmediate(() => {
+        const monitorLoop = async () => {
+            while (isRunning) {
+                try {
+                    await fetchTradeData();
+                } catch (error) {
+                    Logger.warning(`Error during trade fetch: ${error instanceof Error ? error.message : String(error)}`);
+                }
+                if (!isRunning) break;
+                await new Promise((resolve) =>
+                    setTimeout(resolve, FETCH_INTERVAL * TIME_CONSTANTS.SECOND_MS)
+                );
+            }
+            Logger.info('Trade monitor stopped');
+        };
+        monitorLoop().catch(err => Logger.error(`Monitor loop error: ${err}`));
+    });
 
-    Logger.info('Trade monitor stopped');
+    // Return immediately after historical sync is complete
+    // This allows the executor to start while monitoring continues in background
+    return;
 };
 
 export default tradeMonitor;

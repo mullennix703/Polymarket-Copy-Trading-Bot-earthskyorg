@@ -110,7 +110,9 @@ export const main = async (): Promise<void> => {
 
         Logger.separator();
         Logger.info('Starting trade monitor...');
-        tradeMonitor();
+        // Wait for tradeMonitor to complete historical sync BEFORE starting executor
+        // This prevents the executor from processing old trades as new
+        await tradeMonitor();
 
         Logger.info('Starting trade executor...');
         tradeExecutor(clobClient);
