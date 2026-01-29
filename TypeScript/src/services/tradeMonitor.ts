@@ -118,79 +118,82 @@ const init = async (): Promise<void> => {
 };
 
 /**
- * Fetch and process trade data from Polymarket API
+ * Process a single trader's data (extracted for parallel execution)
  */
-const fetchTradeData = async (): Promise<void> => {
-    for (const { address, UserActivity, UserPosition } of userModels) {
-        try {
-            // Fetch trade activities from Polymarket API
-            const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
-            const activities = await fetchData<UserActivityInterface[]>(apiUrl);
+const processTrader = async (
+    address: string,
+    UserActivity: ReturnType<typeof getUserActivityModel>,
+    UserPosition: ReturnType<typeof getUserPositionModel>
+): Promise<void> => {
+    // Fetch trade activities from Polymarket API
+    const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
+    const activities = await fetchData<UserActivityInterface[]>(apiUrl);
 
-            if (!Array.isArray(activities) || activities.length === 0) {
-                continue;
-            }
+    if (!Array.isArray(activities) || activities.length === 0) {
+        return;
+    }
 
-            // Process each activity
-            for (const activity of activities) {
-                // Calculate cutoff timestamp (current time - TOO_OLD_TIMESTAMP hours)
-                const currentUnix = Math.floor(Date.now() / 1000);
-                const cutoffTimestamp = currentUnix - (TOO_OLD_TIMESTAMP * 3600);
+    // Calculate cutoff timestamp once per trader (current time - TOO_OLD_TIMESTAMP hours)
+    const currentUnix = Math.floor(Date.now() / 1000);
+    const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
 
-                // Skip if too old
-                if (activity.timestamp < cutoffTimestamp) {
-                    continue;
-                }
+    // Process each activity
+    for (const activity of activities) {
+        // Skip if too old
+        if (activity.timestamp < cutoffTimestamp) {
+            continue;
+        }
 
-                // Check if this trade already exists in database
-                const existingActivity = await UserActivity.findOne({
-                    transactionHash: activity.transactionHash,
-                }).exec();
+        // Check if this trade already exists in database
+        const existingActivity = await UserActivity.findOne({
+            transactionHash: activity.transactionHash,
+        }).exec();
 
-                if (existingActivity) {
-                    continue; // Already processed this trade
-                }
+        if (existingActivity) {
+            continue; // Already processed this trade
+        }
 
-                // Save new trade to database
-                const newActivity = new UserActivity({
-                    proxyWallet: activity.proxyWallet,
-                    timestamp: activity.timestamp,
-                    conditionId: activity.conditionId,
-                    type: activity.type,
-                    size: activity.size,
-                    usdcSize: activity.usdcSize,
-                    transactionHash: activity.transactionHash,
-                    price: activity.price,
-                    asset: activity.asset,
-                    side: activity.side,
-                    outcomeIndex: activity.outcomeIndex,
-                    title: activity.title,
-                    slug: activity.slug,
-                    icon: activity.icon,
-                    eventSlug: activity.eventSlug,
-                    outcome: activity.outcome,
-                    name: activity.name,
-                    pseudonym: activity.pseudonym,
-                    bio: activity.bio,
-                    profileImage: activity.profileImage,
-                    profileImageOptimized: activity.profileImageOptimized,
-                    bot: false,
-                    botExcutedTime: 0,
-                });
+        // Save new trade to database
+        const newActivity = new UserActivity({
+            proxyWallet: activity.proxyWallet,
+            timestamp: activity.timestamp,
+            conditionId: activity.conditionId,
+            type: activity.type,
+            size: activity.size,
+            usdcSize: activity.usdcSize,
+            transactionHash: activity.transactionHash,
+            price: activity.price,
+            asset: activity.asset,
+            side: activity.side,
+            outcomeIndex: activity.outcomeIndex,
+            title: activity.title,
+            slug: activity.slug,
+            icon: activity.icon,
+            eventSlug: activity.eventSlug,
+            outcome: activity.outcome,
+            name: activity.name,
+            pseudonym: activity.pseudonym,
+            bio: activity.bio,
+            profileImage: activity.profileImage,
+            profileImageOptimized: activity.profileImageOptimized,
+            bot: false,
+            botExcutedTime: 0,
+        });
 
-                await newActivity.save();
-                const now = Date.now();
-                const latency = ((now - activity.timestamp * 1000) / 1000).toFixed(1);
-                Logger.info(`[${new Date(now).toLocaleString()}] New trade detected for ${address.slice(0, 6)}...${address.slice(-4)} (Latency: ${latency}s)`);
-            }
+        await newActivity.save();
+        const now = Date.now();
+        const latency = ((now - activity.timestamp * 1000) / 1000).toFixed(1);
+        Logger.info(
+            `[${new Date(now).toLocaleString()}] New trade detected for ${address.slice(0, 6)}...${address.slice(-4)} (Latency: ${latency}s)`
+        );
+    }
 
-            // Also fetch and update positions
-            const positionsUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.POSITIONS_ENDPOINT}?user=${address}`;
-            const positions = await fetchData<UserPositionInterface[]>(positionsUrl);
-
+    // Update positions in background (non-blocking for trade detection)
+    const positionsUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.POSITIONS_ENDPOINT}?user=${address}`;
+    fetchData<UserPositionInterface[]>(positionsUrl)
+        .then(async (positions) => {
             if (Array.isArray(positions) && positions.length > 0) {
                 for (const position of positions) {
-                    // Update or create position
                     await UserPosition.findOneAndUpdate(
                         { asset: position.asset, conditionId: position.conditionId },
                         {
@@ -224,11 +227,38 @@ const fetchTradeData = async (): Promise<void> => {
                     );
                 }
             }
-        } catch (error) {
-            Logger.error(
-                `Error fetching data for ${address.slice(0, 6)}...${address.slice(-4)}: ${error}`
-            );
-        }
+        })
+        .catch(() => {
+            // Silently ignore position update errors
+        });
+};
+
+/**
+ * Fetch and process trade data from Polymarket API (parallel with batching)
+ */
+const BATCH_SIZE = 10; // Process 10 traders in parallel at a time
+
+const fetchTradeData = async (): Promise<void> => {
+    // Process traders in batches for parallel execution
+    for (let i = 0; i < userModels.length; i += BATCH_SIZE) {
+        const batch = userModels.slice(i, i + BATCH_SIZE);
+
+        // Execute batch in parallel
+        const results = await Promise.allSettled(
+            batch.map(({ address, UserActivity, UserPosition }) =>
+                processTrader(address, UserActivity, UserPosition)
+            )
+        );
+
+        // Log any errors
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                const address = batch[index].address;
+                Logger.error(
+                    `Error fetching data for ${address.slice(0, 6)}...${address.slice(-4)}: ${result.reason}`
+                );
+            }
+        });
     }
 };
 
