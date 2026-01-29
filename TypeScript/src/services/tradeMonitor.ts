@@ -24,11 +24,14 @@ const userModels = USER_ADDRESSES.map((address) => ({
  * Initialize trade monitor and display current status
  */
 const init = async (): Promise<void> => {
-    const counts: number[] = [];
-    for (const { address, UserActivity } of userModels) {
-        const count = await UserActivity.countDocuments();
-        counts.push(count);
-    }
+    Logger.info(`Loading database stats for ${userModels.length} traders...`);
+    
+    // Parallel database queries for better performance
+    const countPromises = userModels.map(({ UserActivity }) => 
+        UserActivity.countDocuments().catch(() => 0)
+    );
+    const counts = await Promise.all(countPromises);
+    
     Logger.clearLine();
     Logger.dbConnection(USER_ADDRESSES, counts);
 
@@ -80,39 +83,53 @@ const init = async (): Promise<void> => {
     }
 
     // Show current positions count with details for traders you're copying
-    const positionCounts: number[] = [];
-    const positionDetails: UserPositionInterface[][] = [];
-    const profitabilities: number[] = [];
-    for (const { address, UserPosition } of userModels) {
-        const positions = await UserPosition.find().exec();
-        positionCounts.push(positions.length);
+    Logger.info(`Loading position data for ${userModels.length} traders (this may take a moment)...`);
+    
+    // Parallel position queries for better performance
+    const positionPromises = userModels.map(async ({ address, UserPosition }) => {
+        try {
+            const positions = await UserPosition.find().exec();
+            
+            // Calculate overall profitability (weighted average by current value)
+            let totalValue = 0;
+            let weightedPnl = 0;
+            positions.forEach((pos) => {
+                const value = pos.currentValue || 0;
+                const pnl = pos.percentPnl || 0;
+                totalValue += value;
+                weightedPnl += value * pnl;
+            });
+            const overallPnl = totalValue > 0 ? weightedPnl / totalValue : 0;
 
-        // Calculate overall profitability (weighted average by current value)
-        let totalValue = 0;
-        let weightedPnl = 0;
-        positions.forEach((pos) => {
-            const value = pos.currentValue || 0;
-            const pnl = pos.percentPnl || 0;
-            totalValue += value;
-            weightedPnl += value * pnl;
-        });
-        const overallPnl = totalValue > 0 ? weightedPnl / totalValue : 0;
-        profitabilities.push(overallPnl);
-
-        // Get top 3 positions by profitability (PnL)
-        const topPositions = positions
-            .sort((a, b) => (b.percentPnl || 0) - (a.percentPnl || 0))
-            .slice(0, 3)
-            .map((p) => {
-                const obj = p.toObject();
-                if (obj.proxyWallet && typeof obj.proxyWallet === 'string') {
-                    return obj as UserPositionInterface;
-                }
-                return null;
-            })
-            .filter((p): p is UserPositionInterface => p !== null);
-        positionDetails.push(topPositions);
-    }
+            // Get top 3 positions by profitability (PnL)
+            const topPositions = positions
+                .sort((a, b) => (b.percentPnl || 0) - (a.percentPnl || 0))
+                .slice(0, 3)
+                .map((p) => {
+                    const obj = p.toObject();
+                    if (obj.proxyWallet && typeof obj.proxyWallet === 'string') {
+                        return obj as UserPositionInterface;
+                    }
+                    return null;
+                })
+                .filter((p): p is UserPositionInterface => p !== null);
+            
+            return {
+                count: positions.length,
+                profitability: overallPnl,
+                details: topPositions,
+            };
+        } catch (error) {
+            Logger.warning(`Failed to load positions for ${address.slice(0, 6)}...${address.slice(-4)}`);
+            return { count: 0, profitability: 0, details: [] as UserPositionInterface[] };
+        }
+    });
+    
+    const positionResults = await Promise.all(positionPromises);
+    const positionCounts = positionResults.map(r => r.count);
+    const profitabilities = positionResults.map(r => r.profitability);
+    const positionDetails = positionResults.map(r => r.details);
+    
     Logger.clearLine();
     Logger.tradersPositions(USER_ADDRESSES, positionCounts, positionDetails, profitabilities);
 };

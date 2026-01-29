@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
+import { formatAddressWithName } from '../config/env';
 
 class Logger {
     private static logsDir = path.join(process.cwd(), 'logs');
@@ -38,6 +39,10 @@ class Logger {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     }
 
+    private static formatTraderAddress(address: string): string {
+        return formatAddressWithName(address);
+    }
+
     private static maskAddress(address: string): string {
         // Show 0x and first 4 chars, mask middle, show last 4 chars
         return `${address.slice(0, 6)}${'*'.repeat(34)}${address.slice(-4)}`;
@@ -73,7 +78,7 @@ class Logger {
     static trade(traderAddress: string, action: string, details: any) {
         console.log('\n' + chalk.magenta('─'.repeat(70)));
         console.log(chalk.magenta.bold('📊 NEW TRADE DETECTED'));
-        console.log(chalk.gray(`Trader: ${this.formatAddress(traderAddress)}`));
+        console.log(chalk.gray(`Trader: ${this.formatTraderAddress(traderAddress)}`));
         console.log(chalk.gray(`Action: ${chalk.white.bold(action)}`));
         if (details.asset) {
             console.log(chalk.gray(`Asset:  ${this.formatAddress(details.asset)}`));
@@ -142,7 +147,7 @@ class Logger {
         );
         console.log(
             chalk.gray(
-                `  Trader total capital: ${chalk.blue.bold(`$${traderBalance.toFixed(2)}`)} (${this.formatAddress(traderAddress)})`
+                `  Trader total capital: ${chalk.blue.bold(`$${traderBalance.toFixed(2)}`)} (${this.formatTraderAddress(traderAddress)})`
             )
         );
     }
