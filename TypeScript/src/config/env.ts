@@ -13,64 +13,64 @@ interface TraderInfo {
 }
 
 const KNOWN_TRADERS_INFO: TraderInfo[] = [
-    { address: '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', name: 'kch123' },
+    { address: '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', name: 'kch123' },//Sports
     { address: '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', name: 'Car' },
-    { address: '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', name: 'Dropper' },
-    { address: '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', name: 'HolyMoses7' },
+    { address: '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', name: 'Dropper' }, //Politics
+    { address: '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', name: 'HolyMoses7' },//Politics
     // { address: '0x8545ff3521691618f2d5e4f5460d76186a5023be', name: '1KChallenge' },
-    { address: '0x751a2b86cab503496efd325c8344e10159349ea1', name: 'Sharky6999' },
+    { address: '0x751a2b86cab503496efd325c8344e10159349ea1', name: 'Sharky6999' },//UpDown
     // { address: '0x134240c2a99fa2a1cd9db6fc2caa65043259c997', name: '1j59y6nk' },
-    { address: '0xfeb581080aee6dc26c264a647b30a9cd44d5a393', name: 'completion' },
-    { address: '0xe3726a1b9c6ba2f06585d1c9e01d00afaedaeb38', name: 'cry.eth2' },
-    { address: '0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1', name: 'aenews2' },
+    { address: '0xfeb581080aee6dc26c264a647b30a9cd44d5a393', name: 'completion' },//UpDown
+    { address: '0xe3726a1b9c6ba2f06585d1c9e01d00afaedaeb38', name: 'cry.eth2' },//Politics
+    { address: '0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1', name: 'aenews2' },//Politics
     { address: '0x4959175440b8f38229b32f2f036057f6893ea6f5', name: 'Majas' },
     // { address: '0x5bffcf561bcae83af680ad600cb99f1184d6ffbe', name: 'YatSen' },
     { address: '0x75e765216a57942d738d880ffcda854d9f869080', name: '25usdc' },
-    { address: '0xd3989ba133ab48b5b3a81e3dba9b37b5966a46d7', name: 'semi' },
-    { address: '0x9c5455d1ff77d42fd093511a2e3a5d3d53f8a525', name: 'cramschool' },
-    { address: '0xf2f6af4f27ec2dcf4072095ab804016e14cd5817', name: 'gopfan2' },
-    { address: '0x594edb9112f526fa6a80b8f858a6379c8a2c1c11', name: '0x594e...c1c11' },
-    { address: '0x9977760c6bd6f824cac834d1a36ee99478d63020', name: 'meropi' },
-    { address: '0xbdcd1a99e6880b8146f61323dcb799bb5b243e9c', name: '1pixel' },
-    { address: '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', name: 'Hans323' },
+    { address: '0xd3989ba133ab48b5b3a81e3dba9b37b5966a46d7', name: 'semi' },//Politics
+    { address: '0x9c5455d1ff77d42fd093511a2e3a5d3d53f8a525', name: 'cramschool' },//UpDown
+    { address: '0xf2f6af4f27ec2dcf4072095ab804016e14cd5817', name: 'gopfan2' },//Politics
+    { address: '0x594edb9112f526fa6a80b8f858a6379c8a2c1c11', name: '0x594e...c1c11' },//Weather
+    { address: '0x9977760c6bd6f824cac834d1a36ee99478d63020', name: 'meropi' },//Weather
+    { address: '0xbdcd1a99e6880b8146f61323dcb799bb5b243e9c', name: '1pixel' },//Weather
+    { address: '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', name: 'Hans323' },//Weather
     { address: '0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11', name: 'automatedAItradingbot' },
-    { address: '0x9d3e989dd42030664e6157dae42f6d549542c49e', name: '0x9d3e...2c49e' },
-    { address: '0x6297b93ea37ff92a57fd636410f3b71ebf74517e', name: 'neobrother' },
-    { address: '0xb43699cbbb52520952833c10737bc43e7625bb3c', name: 'DOJ' },
-    { address: '0x3b7ed1242417f4b8f6992b5dd53aa9415a2c23eb', name: 'phdcapital' },
-    { address: '0x0b219cf3d297991b58361dbebdbaa91e56b8deb6', name: 'TerreMoto' },
-    { address: '0x589222a5124a96765443b97a3498d89ffd824ad2', name: 'PurpleThunderBicycleMountain' },
-    { address: '0x1f0a343513aa6060488fabe96960e6d1e177f7aa', name: 'archaic' },
-    { address: '0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f', name: '0x40e1...D973f' },
-    { address: '0xe00740bce98a594e26861838885ab310ec3b548c', name: 'distinct-baguette' },
-    { address: '0x01542a212c9696da5b409cae879143b8966115a8', name: '0x0154...115a8' },
-    { address: '0x090a0d3fc9d68d3e16db70e3460e3e4b510801b4', name: 'slight-' },
-    { address: '0x6baf05d193692bb208d616709e27442c910a94c5', name: 'SBet365' },
-    { address: '0x6d7776a0f954be1a7c975a1e8244de6268f7b72c', name: 'humanbeans' },
-    { address: '0xb6bed94e75c333dae24eb9c80b3fef47ef3cfcfe', name: 'DickTurbin' },
-    { address: '0x79add3f87e377b0899b935472c07d2c3816ba9f1', name: 'lmtfalone' },
-    { address: '0x858d551d073e9c647c17079ad9021de830201047', name: 'flipfloppity' },
-    { address: '0x961afce6bd9aec79c5cf09d2d4dac2b434b23361', name: 'CRYINGLITTLEBABY' },
-    { address: '0x1ff49fdcb6685c94059b65620f43a683be0ce7a5', name: 'ca6859f3c004bff' },
-    { address: '0x818f214c7f3e479cce1d964d53fe3db7297558cb', name: 'livebreathevolatility' },
-    { address: '0xf247584e41117bbbe4cc06e4d2c95741792a5216', name: '0xf247...a5216' },
+    { address: '0x9d3e989dd42030664e6157dae42f6d549542c49e', name: '0x9d3e...2c49e' },//Weather
+    { address: '0x6297b93ea37ff92a57fd636410f3b71ebf74517e', name: 'neobrother' },//Weather
+    { address: '0xb43699cbbb52520952833c10737bc43e7625bb3c', name: 'DOJ' },//Sports
+    { address: '0x3b7ed1242417f4b8f6992b5dd53aa9415a2c23eb', name: 'phdcapital' },//Politics
+    { address: '0x0b219cf3d297991b58361dbebdbaa91e56b8deb6', name: 'TerreMoto' },//Politics
+    { address: '0x589222a5124a96765443b97a3498d89ffd824ad2', name: 'PurpleThunderBicycleMountain' },//UpDown
+    { address: '0x1f0a343513aa6060488fabe96960e6d1e177f7aa', name: 'archaic' },//Politics
+    { address: '0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f', name: '0x40e1...D973f' },//Politics*
+    { address: '0xe00740bce98a594e26861838885ab310ec3b548c', name: 'distinct-baguette' },//UpDown
+    { address: '0x01542a212c9696da5b409cae879143b8966115a8', name: '0x0154...115a8' },//UpDown
+    { address: '0x090a0d3fc9d68d3e16db70e3460e3e4b510801b4', name: 'slight-' },//Politics
+    { address: '0x6baf05d193692bb208d616709e27442c910a94c5', name: 'SBet365' },//Politics*
+    { address: '0x6d7776a0f954be1a7c975a1e8244de6268f7b72c', name: 'humanbeans' },//Politics
+    { address: '0xb6bed94e75c333dae24eb9c80b3fef47ef3cfcfe', name: 'DickTurbin' },//Politics
+    { address: '0x79add3f87e377b0899b935472c07d2c3816ba9f1', name: 'lmtfalone' },//Politics
+    { address: '0x858d551d073e9c647c17079ad9021de830201047', name: 'flipfloppity' },//Sports
+    { address: '0x961afce6bd9aec79c5cf09d2d4dac2b434b23361', name: 'CRYINGLITTLEBABY' },//UpDown
+    // { address: '0x1ff49fdcb6685c94059b65620f43a683be0ce7a5', name: 'ca6859f3c004bff' },
+    { address: '0x818f214c7f3e479cce1d964d53fe3db7297558cb', name: 'livebreathevolatility' },//UpDown
+    { address: '0xf247584e41117bbbe4cc06e4d2c95741792a5216', name: '0xf247...a5216' },//UpDown
     { address: '0x63ce342161250d705dc0b16df89036c8e5f9ba9a', name: '0x8dxd' }, //UpDown
-    { address: '0x000d257d2dc7616feaef4ae0f14600fdf50a758e', name: 'scottilicious' },
+    { address: '0x000d257d2dc7616feaef4ae0f14600fdf50a758e', name: 'scottilicious' },//Politics
     { address: '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', name: 'ImJustKen' },
-    { address: '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', name: 'crispy-avocado' },
-    { address: '0xa9878e59934ab507f9039bcb917c1bae0451141d', name: 'ilovecircle' },
-    { address: '0x336848a1a1cb00348020c9457676f34d882f21cd', name: '0x3368...f21cd' },
+    { address: '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', name: 'crispy-avocado' },//Sports
+    { address: '0xa9878e59934ab507f9039bcb917c1bae0451141d', name: 'ilovecircle' },//Sports
+    { address: '0x336848a1a1cb00348020c9457676f34d882f21cd', name: '0x3368...f21cd' },//UpDown
     { address: '0x22e4248bdb066f65c9f11cd66cdd3719a28eef1c', name: 'ProfessionalPunter' },
-    { address: '0xcc500cbcc8b7cf5bd21975ebbea34f21b5644c82', name: 'justdance' },
-    { address: '0x55be7aa03ecfbe37aa5460db791205f7ac9ddca3', name: 'coinman2' },
+    { address: '0xcc500cbcc8b7cf5bd21975ebbea34f21b5644c82', name: 'justdance' },//UpDown
+    { address: '0x55be7aa03ecfbe37aa5460db791205f7ac9ddca3', name: 'coinman2' },//UpDown
     { address: '0xe9c6312464b52aa3eff13d822b003282075995c9', name: 'kingofcoinflips' },
-    { address: '0x6031b6eed1c97e853c6e0f03ad3ce3529351f96d', name: 'gabagool22' }, //UpDown
-    { address: '0x71a70f24538d885d1b45f9cea158a2cdf2e56fcf', name: 'easyclap' },
+    { address: '0x6031b6eed1c97e853c6e0f03ad3ce3529351f96d', name: 'gabagool22' },//UpDown
+    { address: '0x71a70f24538d885d1b45f9cea158a2cdf2e56fcf', name: 'easyclap' },//UpDown
     { address: '0xa2f1fecf1cc7db65a46588f764b6691533052d22', name: 'elPolloLoco' },
-    { address: '0x16b29c50f2439faf627209b2ac0c7bbddaa8a881', name: 'SeriouslySirius' },
-    { address: '0x4b92a2d2fd3807981a5dddae7315122530a542e6', name: 'wisser' },
-    { address: '0x89e75fd541c6cb6549f13e98c78b971c8f3e50e9', name: 'ClaudeAI' },
-    { address: '0x204f72f35326db932158cba6adff0b9a1da95e14', name: 'swisstony' },
+    { address: '0x16b29c50f2439faf627209b2ac0c7bbddaa8a881', name: 'SeriouslySirius' },//Sports
+    { address: '0x4b92a2d2fd3807981a5dddae7315122530a542e6', name: 'wisser' },//Politics
+    { address: '0x89e75fd541c6cb6549f13e98c78b971c8f3e50e9', name: 'ClaudeAI' },//Politics
+    { address: '0x204f72f35326db932158cba6adff0b9a1da95e14', name: 'swisstony' },//Sports
 ];
 
 // Create address to name mapping for quick lookup
