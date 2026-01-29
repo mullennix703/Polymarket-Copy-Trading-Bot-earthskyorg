@@ -1,6 +1,6 @@
 import { ClobClient } from '@polymarket/clob-client';
 import { UserActivityInterface, UserPositionInterface, TradeSide } from '../interfaces/User';
-import { ENV } from '../config/env';
+import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS } from '../config/env';
 import { getUserActivityModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
 import getMyBalance from '../utils/getMyBalance';
@@ -168,6 +168,27 @@ const getReadyAggregatedTrades = (): AggregatedTrade[] => {
  */
 const doTrading = async (clobClient: ClobClient, trades: TradeWithUser[]): Promise<void> => {
     for (const trade of trades) {
+        // Check if this is an UpDown trader
+        if (isUpDownTrader(trade.userAddress)) {
+            const currentUnix = Math.floor(Date.now() / 1000);
+            const tradeAgeSeconds = currentUnix - trade.timestamp;
+            const traderName = getTraderName(trade.userAddress);
+            
+            // Skip UpDown trades older than 15 minutes
+            if (tradeAgeSeconds > UPDOWN_STALENESS_THRESHOLD_SECONDS) {
+                Logger.info(
+                    `⏭️ [UpDown] Skipping stale trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old (threshold: 15min) - "${trade.slug || trade.asset}"`
+                );
+                // Mark as processed so it doesn't appear again
+                const UserActivity = getUserActivityModel(trade.userAddress);
+                await UserActivity.updateOne(
+                    { _id: trade._id },
+                    { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
+                );
+                continue;
+            }
+        }
+
         // Mark trade as being processed immediately to prevent duplicate processing
         const UserActivity = getUserActivityModel(trade.userAddress);
         await UserActivity.updateOne(
@@ -237,6 +258,31 @@ const doAggregatedTrading = async (
     aggregatedTrades: AggregatedTrade[]
 ): Promise<void> => {
     for (const agg of aggregatedTrades) {
+        // Check if this is an UpDown trader
+        if (isUpDownTrader(agg.userAddress)) {
+            const currentUnix = Math.floor(Date.now() / 1000);
+            // Use the oldest trade in the aggregation to calculate age
+            const oldestTradeTimestamp = Math.min(...agg.trades.map(t => t.timestamp));
+            const tradeAgeSeconds = currentUnix - oldestTradeTimestamp;
+            const traderName = getTraderName(agg.userAddress);
+            
+            // Skip UpDown trades older than 15 minutes
+            if (tradeAgeSeconds > UPDOWN_STALENESS_THRESHOLD_SECONDS) {
+                Logger.info(
+                    `⏭️ [UpDown] Skipping stale aggregated trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old (threshold: 15min) - "${agg.slug || agg.asset}"`
+                );
+                // Mark all trades as processed
+                for (const trade of agg.trades) {
+                    const UserActivity = getUserActivityModel(trade.userAddress);
+                    await UserActivity.updateOne(
+                        { _id: trade._id },
+                        { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
+                    );
+                }
+                continue;
+            }
+        }
+
         Logger.header(`📊 AGGREGATED TRADE (${agg.trades.length} trades combined)`);
         Logger.info(`Market: ${agg.slug || agg.asset}`);
         Logger.info(`Side: ${agg.side}`);

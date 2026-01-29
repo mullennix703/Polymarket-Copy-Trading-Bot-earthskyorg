@@ -1,4 +1,4 @@
-import { ENV } from '../config/env';
+import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS } from '../config/env';
 import { getUserActivityModel, getUserPositionModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
 import Logger from '../utils/logger';
@@ -153,6 +153,10 @@ const processTrader = async (
     // Calculate cutoff timestamp once per trader (current time - TOO_OLD_TIMESTAMP hours)
     const currentUnix = Math.floor(Date.now() / 1000);
     const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
+    
+    // Check if this is an UpDown trader (short-term crypto price predictions)
+    const isUpDown = isUpDownTrader(address);
+    const traderName = getTraderName(address);
 
     // Process each activity
     for (const activity of activities) {
@@ -161,7 +165,28 @@ const processTrader = async (
             continue;
         }
 
-        // Check if this trade already exists in database
+        // Special handling for UpDown traders
+        if (isUpDown) {
+            const tradeAgeSeconds = currentUnix - activity.timestamp;
+            
+            // For UpDown traders, if trade is older than 15 minutes, skip processing and just log
+            if (tradeAgeSeconds > UPDOWN_STALENESS_THRESHOLD_SECONDS) {
+                Logger.info(
+                    `⏭️ [UpDown] Skipping stale trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old (threshold: 15min) - "${activity.title || 'Unknown'}"`
+                );
+                continue;
+            }
+            
+            // For UpDown traders within 15 minutes, process but don't save to database
+            Logger.info(
+                `📊 [UpDown] Fresh trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old - "${activity.title || 'Unknown'}" (not saving to DB)`
+            );
+            // Note: We skip database save for UpDown traders but the trade will still be
+            // picked up by trade executor if it's fresh enough (handled separately)
+            continue;
+        }
+
+        // Check if this trade already exists in database (for non-UpDown traders)
         const existingActivity = await UserActivity.findOne({
             transactionHash: activity.transactionHash,
         }).exec();
@@ -170,7 +195,7 @@ const processTrader = async (
             continue; // Already processed this trade
         }
 
-        // Save new trade to database
+        // Save new trade to database (only for non-UpDown traders)
         const newActivity = new UserActivity({
             proxyWallet: activity.proxyWallet,
             timestamp: activity.timestamp,
@@ -313,6 +338,12 @@ const tradeMonitor = async (): Promise<void> => {
         
         // Fetch all current trades from API and save them as already processed
         for (const { address, UserActivity } of userModels) {
+            // Skip database sync for UpDown traders (they don't save to DB)
+            if (isUpDownTrader(address)) {
+                Logger.info(`⏭️ Skipping DB sync for UpDown trader: ${getTraderName(address)}`);
+                continue;
+            }
+            
             try {
                 const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
                 const activities = await fetchData<UserActivityInterface[]>(apiUrl);
@@ -371,8 +402,13 @@ const tradeMonitor = async (): Promise<void> => {
             }
         }
         
-        // Also mark any existing unprocessed trades in DB
+        // Also mark any existing unprocessed trades in DB (skip UpDown traders)
         for (const { address, UserActivity } of userModels) {
+            // Skip UpDown traders as they don't use the database
+            if (isUpDownTrader(address)) {
+                continue;
+            }
+            
             try {
                 await UserActivity.updateMany(
                     { [DB_FIELDS.BOT_EXECUTED]: false },
