@@ -1,4 +1,5 @@
 import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS } from '../config/env';
+import { isDatabaseAvailable } from '../config/db';
 import { getUserActivityModel, getUserPositionModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
 import Logger from '../utils/logger';
@@ -186,6 +187,16 @@ const processTrader = async (
             continue;
         }
 
+        // Skip database operations if database is unavailable
+        if (!isDatabaseAvailable()) {
+            const now = Date.now();
+            const latency = ((now - activity.timestamp * 1000) / 1000).toFixed(1);
+            Logger.info(
+                `[${new Date(now).toLocaleString()}] 📡 Trade detected for ${address.slice(0, 6)}...${address.slice(-4)} (DB unavailable, skipping save) - Latency: ${latency}s`
+            );
+            continue;
+        }
+
         // Check if this trade already exists in database (for non-UpDown traders)
         const existingActivity = await UserActivity.findOne({
             transactionHash: activity.transactionHash,
@@ -231,9 +242,18 @@ const processTrader = async (
     }
 
     // Update positions in background (non-blocking for trade detection)
+    // Skip if database is unavailable
+    if (!isDatabaseAvailable()) {
+        return;
+    }
+    
     const positionsUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.POSITIONS_ENDPOINT}?user=${address}`;
     fetchData<UserPositionInterface[]>(positionsUrl)
         .then(async (positions) => {
+            // Re-check database availability before writing
+            if (!isDatabaseAvailable()) {
+                return;
+            }
             if (Array.isArray(positions) && positions.length > 0) {
                 for (const position of positions) {
                     await UserPosition.findOneAndUpdate(
@@ -271,7 +291,10 @@ const processTrader = async (
             }
         })
         .catch((error) => {
-            Logger.warning(`Position update failed for ${address.slice(0, 6)}...${address.slice(-4)}: ${error}`);
+            // Only log if not a connection error (to reduce noise when DB is unavailable)
+            if (isDatabaseAvailable()) {
+                Logger.warning(`Position update failed for ${address.slice(0, 6)}...${address.slice(-4)}: ${error}`);
+            }
         });
 };
 
@@ -334,47 +357,53 @@ const tradeMonitor = async (): Promise<void> => {
     // On first run, fetch and mark all existing historical trades as already processed
     // This MUST complete BEFORE the trade executor starts to avoid processing old trades
     if (isFirstRun) {
-        Logger.info('Syncing historical trades (this prevents old trades from being executed)...');
-        
-        // Fetch all current trades from API and save them as already processed
-        for (const { address, UserActivity } of userModels) {
-            // Skip database sync for UpDown traders (they don't save to DB)
-            if (isUpDownTrader(address)) {
-                Logger.info(`⏭️ Skipping DB sync for UpDown trader: ${getTraderName(address)}`);
-                continue;
-            }
+        // Skip historical sync if database is unavailable
+        if (!isDatabaseAvailable()) {
+            Logger.info('📡 Database unavailable - skipping historical sync');
+            isFirstRun = false;
+            Logger.separator();
+        } else {
+            Logger.info('Syncing historical trades (this prevents old trades from being executed)...');
             
-            try {
-                const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
-                const activities = await fetchData<UserActivityInterface[]>(apiUrl);
+            // Fetch all current trades from API and save them as already processed
+            for (const { address, UserActivity } of userModels) {
+                // Skip database sync for UpDown traders (they don't save to DB)
+                if (isUpDownTrader(address)) {
+                    Logger.info(`⏭️ Skipping DB sync for UpDown trader: ${getTraderName(address)}`);
+                    continue;
+                }
                 
-                if (Array.isArray(activities) && activities.length > 0) {
-                    const currentUnix = Math.floor(Date.now() / 1000);
-                    const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
+                try {
+                    const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
+                    const activities = await fetchData<UserActivityInterface[]>(apiUrl);
                     
-                    let savedCount = 0;
-                    for (const activity of activities) {
-                        if (activity.timestamp < cutoffTimestamp) continue;
+                    if (Array.isArray(activities) && activities.length > 0) {
+                        const currentUnix = Math.floor(Date.now() / 1000);
+                        const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
                         
-                        const existingActivity = await UserActivity.findOne({
-                            transactionHash: activity.transactionHash,
-                        }).exec();
-                        
-                        if (!existingActivity) {
-                            const newActivity = new UserActivity({
-                                proxyWallet: activity.proxyWallet,
-                                timestamp: activity.timestamp,
-                                conditionId: activity.conditionId,
-                                type: activity.type,
-                                size: activity.size,
-                                usdcSize: activity.usdcSize,
+                        let savedCount = 0;
+                        for (const activity of activities) {
+                            if (activity.timestamp < cutoffTimestamp) continue;
+                            
+                            const existingActivity = await UserActivity.findOne({
                                 transactionHash: activity.transactionHash,
-                                price: activity.price,
-                                asset: activity.asset,
-                                side: activity.side,
-                                outcomeIndex: activity.outcomeIndex,
-                                title: activity.title,
-                                slug: activity.slug,
+                            }).exec();
+                            
+                            if (!existingActivity) {
+                                const newActivity = new UserActivity({
+                                    proxyWallet: activity.proxyWallet,
+                                    timestamp: activity.timestamp,
+                                    conditionId: activity.conditionId,
+                                    type: activity.type,
+                                    size: activity.size,
+                                    usdcSize: activity.usdcSize,
+                                    transactionHash: activity.transactionHash,
+                                    price: activity.price,
+                                    asset: activity.asset,
+                                    side: activity.side,
+                                    outcomeIndex: activity.outcomeIndex,
+                                    title: activity.title,
+                                    slug: activity.slug,
                                 icon: activity.icon,
                                 eventSlug: activity.eventSlug,
                                 outcome: activity.outcome,
@@ -402,31 +431,32 @@ const tradeMonitor = async (): Promise<void> => {
             }
         }
         
-        // Also mark any existing unprocessed trades in DB (skip UpDown traders)
-        for (const { address, UserActivity } of userModels) {
-            // Skip UpDown traders as they don't use the database
-            if (isUpDownTrader(address)) {
-                continue;
+            // Also mark any existing unprocessed trades in DB (skip UpDown traders)
+            for (const { address, UserActivity } of userModels) {
+                // Skip UpDown traders as they don't use the database
+                if (isUpDownTrader(address)) {
+                    continue;
+                }
+                
+                try {
+                    await UserActivity.updateMany(
+                        { [DB_FIELDS.BOT_EXECUTED]: false },
+                        {
+                            $set: {
+                                [DB_FIELDS.BOT_EXECUTED]: true,
+                                [DB_FIELDS.BOT_EXECUTED_TIME]: 999,
+                            },
+                        }
+                    );
+                } catch (error) {
+                    // Ignore DB errors during initialization
+                }
             }
             
-            try {
-                await UserActivity.updateMany(
-                    { [DB_FIELDS.BOT_EXECUTED]: false },
-                    {
-                        $set: {
-                            [DB_FIELDS.BOT_EXECUTED]: true,
-                            [DB_FIELDS.BOT_EXECUTED_TIME]: 999,
-                        },
-                    }
-                );
-            } catch (error) {
-                // Ignore DB errors during initialization
-            }
+            isFirstRun = false;
+            Logger.success('Historical trades synced. Trade executor can now safely start.');
+            Logger.separator();
         }
-        
-        isFirstRun = false;
-        Logger.success('Historical trades synced. Trade executor can now safely start.');
-        Logger.separator();
     }
 
     // Start monitoring loop in the background (non-blocking)

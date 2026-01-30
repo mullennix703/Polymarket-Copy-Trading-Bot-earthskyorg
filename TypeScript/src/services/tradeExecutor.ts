@@ -1,6 +1,7 @@
 import { ClobClient } from '@polymarket/clob-client';
 import { UserActivityInterface, UserPositionInterface, TradeSide } from '../interfaces/User';
 import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS } from '../config/env';
+import { isDatabaseAvailable } from '../config/db';
 import { getUserActivityModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
 import getMyBalance from '../utils/getMyBalance';
@@ -48,6 +49,12 @@ const tradeAggregationBuffer: Map<string, AggregatedTrade> = new Map();
  * @returns Array of trades with user address attached
  */
 const readTempTrades = async (): Promise<TradeWithUser[]> => {
+    // Skip reading from database if unavailable
+    if (!isDatabaseAvailable()) {
+        Logger.info('📡 Database unavailable - skipping trade read from DB');
+        return [];
+    }
+
     const allTrades: TradeWithUser[] = [];
 
     for (const { address, model } of userActivityModels) {
@@ -144,13 +151,15 @@ const getReadyAggregatedTrades = (): AggregatedTrade[] => {
                     `Trade aggregation for ${agg.userAddress} on ${agg.slug || agg.asset}: $${agg.totalUsdcSize.toFixed(2)} total from ${agg.trades.length} trades below minimum ($${TRADE_AGGREGATION_MIN_TOTAL_USD}) - skipping`
                 );
 
-                // Mark all trades in this aggregation as processed (bot: true)
-                for (const trade of agg.trades) {
-                    const UserActivity = getUserActivityModel(trade.userAddress);
-                    UserActivity.updateOne(
-                        { _id: trade._id },
-                        { [DB_FIELDS.BOT_EXECUTED]: true }
-                    ).exec();
+                // Mark all trades in this aggregation as processed (bot: true) - if DB available
+                if (isDatabaseAvailable()) {
+                    for (const trade of agg.trades) {
+                        const UserActivity = getUserActivityModel(trade.userAddress);
+                        UserActivity.updateOne(
+                            { _id: trade._id },
+                            { [DB_FIELDS.BOT_EXECUTED]: true }
+                        ).exec();
+                    }
                 }
             }
             // Remove from buffer either way
@@ -179,22 +188,26 @@ const doTrading = async (clobClient: ClobClient, trades: TradeWithUser[]): Promi
                 Logger.info(
                     `⏭️ [UpDown] Skipping stale trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old (threshold: 15min) - "${trade.slug || trade.asset}"`
                 );
-                // Mark as processed so it doesn't appear again
-                const UserActivity = getUserActivityModel(trade.userAddress);
-                await UserActivity.updateOne(
-                    { _id: trade._id },
-                    { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
-                );
+                // Mark as processed so it doesn't appear again (if DB available)
+                if (isDatabaseAvailable()) {
+                    const UserActivity = getUserActivityModel(trade.userAddress);
+                    await UserActivity.updateOne(
+                        { _id: trade._id },
+                        { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
+                    );
+                }
                 continue;
             }
         }
 
-        // Mark trade as being processed immediately to prevent duplicate processing
-        const UserActivity = getUserActivityModel(trade.userAddress);
-        await UserActivity.updateOne(
-            { _id: trade._id },
-            { $set: { [DB_FIELDS.BOT_EXECUTED_TIME]: 1 } }
-        );
+        // Mark trade as being processed immediately to prevent duplicate processing (if DB available)
+        if (isDatabaseAvailable()) {
+            const UserActivity = getUserActivityModel(trade.userAddress);
+            await UserActivity.updateOne(
+                { _id: trade._id },
+                { $set: { [DB_FIELDS.BOT_EXECUTED_TIME]: 1 } }
+            );
+        }
 
         Logger.trade(trade.userAddress, trade.side || 'UNKNOWN', {
             asset: trade.asset,
@@ -271,13 +284,15 @@ const doAggregatedTrading = async (
                 Logger.info(
                     `⏭️ [UpDown] Skipping stale aggregated trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old (threshold: 15min) - "${agg.slug || agg.asset}"`
                 );
-                // Mark all trades as processed
-                for (const trade of agg.trades) {
-                    const UserActivity = getUserActivityModel(trade.userAddress);
-                    await UserActivity.updateOne(
-                        { _id: trade._id },
-                        { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
-                    );
+                // Mark all trades as processed (if DB available)
+                if (isDatabaseAvailable()) {
+                    for (const trade of agg.trades) {
+                        const UserActivity = getUserActivityModel(trade.userAddress);
+                        await UserActivity.updateOne(
+                            { _id: trade._id },
+                            { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
+                        );
+                    }
                 }
                 continue;
             }
@@ -289,13 +304,15 @@ const doAggregatedTrading = async (
         Logger.info(`Total volume: $${agg.totalUsdcSize.toFixed(2)}`);
         Logger.info(`Average price: $${agg.averagePrice.toFixed(4)}`);
 
-        // Mark all individual trades as being processed
-        for (const trade of agg.trades) {
-            const UserActivity = getUserActivityModel(trade.userAddress);
-            await UserActivity.updateOne(
-                { _id: trade._id },
-                { $set: { [DB_FIELDS.BOT_EXECUTED_TIME]: 1 } }
-            );
+        // Mark all individual trades as being processed (if DB available)
+        if (isDatabaseAvailable()) {
+            for (const trade of agg.trades) {
+                const UserActivity = getUserActivityModel(trade.userAddress);
+                await UserActivity.updateOne(
+                    { _id: trade._id },
+                    { $set: { [DB_FIELDS.BOT_EXECUTED_TIME]: 1 } }
+                );
+            }
         }
 
         const my_positions: UserPositionInterface[] = await fetchData<UserPositionInterface[]>(

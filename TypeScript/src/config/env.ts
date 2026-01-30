@@ -15,6 +15,8 @@ interface TraderInfo {
 
 const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', name: 'kch123', category: 'Sports' },
+    { address: '0xee00ba338c59557141789b127927a55f5cc5cea1', name: 'S-Works', category: 'Sports' },
+    { address: '0x20d6436849f930584892730c7f96ebb2ac763856', name: '0x20D6436849F930584892730C7F96eBB2Ac763856-1768642056357', category: 'Sports' },
     { address: '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', name: 'Car' },
     { address: '0xd218e474776403a330142299f7796e8ba32eb5c9', name: 'cigarettes' },
     { address: '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', name: 'Dropper', category: 'Politics' },
@@ -22,6 +24,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     // { address: '0x8545ff3521691618f2d5e4f5460d76186a5023be', name: '1KChallenge' },
     { address: '0x751a2b86cab503496efd325c8344e10159349ea1', name: 'Sharky6999', category: 'UpDown' },
     { address: '0xe9c6312464b52aa3eff13d822b003282075995c9', name: 'kingofcoinflips', category: 'UpDown' },
+    { address: '0xd0d6053c3c37e727402d84c14069780d360993aa', name: 'k9Q2mX4L8A7ZP3R', category: 'UpDown' },
     // { address: '0x134240c2a99fa2a1cd9db6fc2caa65043259c997', name: '1j59y6nk' },
     { address: '0xfeb581080aee6dc26c264a647b30a9cd44d5a393', name: 'completion', category: 'UpDown' },
     { address: '0xe3726a1b9c6ba2f06585d1c9e01d00afaedaeb38', name: 'cry.eth2', category: 'Politics' },

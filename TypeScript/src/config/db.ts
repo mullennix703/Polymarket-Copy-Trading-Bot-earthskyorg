@@ -5,6 +5,34 @@ import { DatabaseError } from '../utils/errors';
 
 const uri = ENV.MONGO_URI || 'mongodb://localhost:27017/polymarket_copytrading';
 
+// Global flag to track if database is available
+let isDbAvailable = true;
+
+/**
+ * Check if database is currently available
+ */
+export const isDatabaseAvailable = (): boolean => isDbAvailable;
+
+/**
+ * Mark database as unavailable (called when connection is lost)
+ */
+export const markDatabaseUnavailable = (): void => {
+    if (isDbAvailable) {
+        isDbAvailable = false;
+        console.log(chalk.yellow('⚠'), 'Database marked as unavailable - DB operations will be skipped');
+    }
+};
+
+/**
+ * Mark database as available (called when connection is restored)
+ */
+export const markDatabaseAvailable = (): void => {
+    if (!isDbAvailable) {
+        isDbAvailable = true;
+        console.log(chalk.green('✓'), 'Database marked as available - DB operations resumed');
+    }
+};
+
 /**
  * Validate MongoDB connection string format
  */
@@ -125,10 +153,12 @@ const connectDB = async (): Promise<void> => {
     // Set up connection event listeners for auto-reconnect and monitoring
     mongoose.connection.on('disconnected', () => {
         console.log(chalk.yellow('⚠'), 'MongoDB disconnected. Driver will attempt to reconnect...');
+        markDatabaseUnavailable();
     });
 
     mongoose.connection.on('reconnected', () => {
         console.log(chalk.green('✓'), 'MongoDB reconnected successfully');
+        markDatabaseAvailable();
     });
 
     mongoose.connection.on('error', (err) => {
