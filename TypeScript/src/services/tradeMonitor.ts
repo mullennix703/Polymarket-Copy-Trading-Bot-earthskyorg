@@ -46,7 +46,8 @@ const init = async (): Promise<void> => {
 
         // Get current USDC balance
         const getMyBalance = (await import('../utils/getMyBalance')).default;
-        const currentBalance = await getMyBalance(ENV.PROXY_WALLET);
+        // const currentBalance = await getMyBalance(ENV.PROXY_WALLET);
+        const currentBalance = 0;
 
         if (Array.isArray(myPositions) && myPositions.length > 0) {
             // Calculate your overall profitability and initial investment

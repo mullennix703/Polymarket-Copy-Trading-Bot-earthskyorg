@@ -233,8 +233,9 @@ const doTrading = async (clobClient: ClobClient, trades: TradeWithUser[]): Promi
             (position: UserPositionInterface) => position.conditionId === trade.conditionId
         );
 
-        // Get USDC balance
-        const my_balance = await getMyBalance(PROXY_WALLET);
+        // Get USDC balance (skipped in monitor mode to avoid RPC calls)
+        // const my_balance = await getMyBalance(PROXY_WALLET);
+        const my_balance = 0; // Monitor mode: balance check disabled
 
         // Calculate trader's total portfolio value from positions
         const user_balance = user_positions.reduce((total, pos) => {
@@ -328,8 +329,9 @@ const doAggregatedTrading = async (
             (position: UserPositionInterface) => position.conditionId === agg.conditionId
         );
 
-        // Get USDC balance
-        const my_balance = await getMyBalance(PROXY_WALLET);
+        // Get USDC balance (skipped in monitor mode to avoid RPC calls)
+        // const my_balance = await getMyBalance(PROXY_WALLET);
+        const my_balance = 0; // Monitor mode: balance check disabled
 
         // Calculate trader's total portfolio value from positions
         const user_balance = user_positions.reduce((total, pos) => {
