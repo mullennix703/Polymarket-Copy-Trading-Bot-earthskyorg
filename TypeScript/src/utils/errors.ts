@@ -99,8 +99,9 @@ export function isOperationalError(error: unknown): boolean {
     // Treat MongoDB and network connection errors as operational (recoverable)
     if (error instanceof Error) {
         const message = error.message.toLowerCase();
+        const errorName = error.name?.toLowerCase() || '';
         
-        // MongoDB connection errors
+        // MongoDB connection errors (including driver-specific patterns)
         const isMongoConnectionError = 
             message.includes('connection') && (
                 message.includes('closed') ||
@@ -109,7 +110,9 @@ export function isOperationalError(error: unknown): boolean {
                 message.includes('econnrefused') ||
                 message.includes('econnreset') ||
                 message.includes('socket hang up')
-            );
+            ) ||
+            // Match pattern like "connection 7 to xxx:27017 closed"
+            /connection \d+ to .+:\d+ closed/i.test(message);
         
         // Network/fetch errors
         const isNetworkError = 
@@ -127,7 +130,8 @@ export function isOperationalError(error: unknown): boolean {
             message.includes('topology was destroyed') ||
             message.includes('server selection timed out') ||
             message.includes('mongonetworkerror') ||
-            message.includes('connection') && message.includes('27017');
+            message.includes(':27017') ||  // Any error mentioning MongoDB port
+            errorName.includes('mongo');   // MongoError, MongoNetworkError, etc.
         
         if (isMongoConnectionError || isNetworkError || isMongooseError) {
             return true; // Don't crash on these recoverable errors

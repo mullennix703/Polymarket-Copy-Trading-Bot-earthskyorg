@@ -53,12 +53,16 @@ process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) =>
     Logger.error(
         `Unhandled Rejection at: ${promise}, reason: ${error.message}${error.stack ? `\n${error.stack}` : ''}`
     );
-    // Don't exit immediately for operational errors, let the application try to recover
-    if (!isOperationalError(error)) {
+    // Check the ORIGINAL reason, not the normalized error
+    // This allows proper detection of recoverable MongoDB/network errors
+    if (!isOperationalError(reason)) {
         Logger.error('Non-operational error detected, shutting down...');
         gracefulShutdown('unhandledRejection').catch(() => {
             process.exit(1);
         });
+    } else {
+        // Log that we're ignoring this recoverable error
+        Logger.info('Operational error detected - allowing system to recover automatically');
     }
 });
 
