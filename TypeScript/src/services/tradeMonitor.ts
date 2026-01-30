@@ -365,11 +365,43 @@ const tradeMonitor = async (): Promise<void> => {
         } else {
             Logger.info('Syncing historical trades (this prevents old trades from being executed)...');
             
+            // First, clean up all unprocessed trades from UpDown traders in the database
+            // Only query if there are actually unprocessed records (avoid unnecessary writes)
+            let totalUpDownCleaned = 0;
+            for (const { address, UserActivity } of userModels) {
+                if (isUpDownTrader(address)) {
+                    try {
+                        // First check if there are any unprocessed records
+                        const unprocessedCount = await UserActivity.countDocuments({
+                            [DB_FIELDS.BOT_EXECUTED]: false
+                        }).exec();
+                        
+                        // Only update if there are records to clean
+                        if (unprocessedCount > 0) {
+                            const result = await UserActivity.updateMany(
+                                { [DB_FIELDS.BOT_EXECUTED]: false },
+                                {
+                                    $set: {
+                                        [DB_FIELDS.BOT_EXECUTED]: true,
+                                        [DB_FIELDS.BOT_EXECUTED_TIME]: 999,
+                                    },
+                                }
+                            );
+                            totalUpDownCleaned += result.modifiedCount;
+                        }
+                    } catch (error) {
+                        // Ignore DB errors during cleanup
+                    }
+                }
+            }
+            if (totalUpDownCleaned > 0) {
+                Logger.info(`🧹 Cleaned up ${totalUpDownCleaned} old UpDown trades from database`);
+            }
+            
             // Fetch all current trades from API and save them as already processed
             for (const { address, UserActivity } of userModels) {
                 // Skip database sync for UpDown traders (they don't save to DB)
                 if (isUpDownTrader(address)) {
-                    Logger.info(`⏭️ Skipping DB sync for UpDown trader: ${getTraderName(address)}`);
                     continue;
                 }
                 
