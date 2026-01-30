@@ -11,11 +11,22 @@ const TOO_OLD_TIMESTAMP = ENV.TOO_OLD_TIMESTAMP;
 const FETCH_INTERVAL = ENV.FETCH_INTERVAL;
 
 // Track logged stale UpDown trades to prevent duplicate logging
+// Use composite key: address + conditionId + type + approximate timestamp (rounded to hour)
+// This prevents logging the same logical trade multiple times even with different transactionHashes
 const loggedStaleUpDownTrades = new Set<string>();
 // Track logged skipped 15-minute UpDown trades to prevent duplicate logging
 const loggedSkipped15MinTrades = new Set<string>();
 // Track logged skipped 1-hour UpDown trades to prevent duplicate logging
 const loggedSkipped1HourTrades = new Set<string>();
+
+/**
+ * Generate a unique key for deduplicating stale trade logs
+ * Uses address + conditionId + type + hour-rounded timestamp to identify "same" trades
+ */
+const getStaleTradeLogKey = (address: string, activity: UserActivityInterface): string => {
+    const hourTimestamp = Math.floor(activity.timestamp / 3600) * 3600; // Round to hour
+    return `${address}:${activity.conditionId}:${activity.type}:${hourTimestamp}`;
+};
 
 if (!USER_ADDRESSES || USER_ADDRESSES.length === 0) {
     throw new Error('USER_ADDRESSES is not defined or empty');
@@ -201,12 +212,15 @@ const processTrader = async (
             
             // For UpDown traders, if trade is older than 15 minutes, skip processing and just log once
             if (tradeAgeSeconds > UPDOWN_STALENESS_THRESHOLD_SECONDS) {
-                // Only log if we haven't logged this transaction before
-                if (!loggedStaleUpDownTrades.has(activity.transactionHash)) {
+                // Use composite key for better deduplication
+                const logKey = getStaleTradeLogKey(address, activity);
+                
+                // Only log if we haven't logged this logical trade before
+                if (!loggedStaleUpDownTrades.has(logKey)) {
                     Logger.info(
                         `⏭️ [UpDown] Skipping stale trade from ${traderName}: ${(tradeAgeSeconds / 60).toFixed(1)}min old (threshold: 15min) - "${activity.title || 'Unknown'}"`
                     );
-                    loggedStaleUpDownTrades.add(activity.transactionHash);
+                    loggedStaleUpDownTrades.add(logKey);
                 }
                 continue;
             }
