@@ -1,4 +1,4 @@
-import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade, is15MinuteUpDownTrade } from '../config/env';
+import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade, shouldProcess1HourUpDownTrade } from '../config/env';
 import { isDatabaseAvailable } from '../config/db';
 import { getUserActivityModel, getUserPositionModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
@@ -14,6 +14,8 @@ const FETCH_INTERVAL = ENV.FETCH_INTERVAL;
 const loggedStaleUpDownTrades = new Set<string>();
 // Track logged skipped 15-minute UpDown trades to prevent duplicate logging
 const loggedSkipped15MinTrades = new Set<string>();
+// Track logged skipped 1-hour UpDown trades to prevent duplicate logging
+const loggedSkipped1HourTrades = new Set<string>();
 
 if (!USER_ADDRESSES || USER_ADDRESSES.length === 0) {
     throw new Error('USER_ADDRESSES is not defined or empty');
@@ -180,6 +182,15 @@ const processTrader = async (
             // Only log once per transaction (silently skip to reduce noise)
             if (!loggedSkipped15MinTrades.has(activity.transactionHash)) {
                 loggedSkipped15MinTrades.add(activity.transactionHash);
+            }
+            continue;
+        }
+
+        // Skip 1-hour UpDown trades if disabled (daily UpDown trades are not affected)
+        if (!shouldProcess1HourUpDownTrade(tradeIdentifier)) {
+            // Only log once per transaction (silently skip to reduce noise)
+            if (!loggedSkipped1HourTrades.has(activity.transactionHash)) {
+                loggedSkipped1HourTrades.add(activity.transactionHash);
             }
             continue;
         }

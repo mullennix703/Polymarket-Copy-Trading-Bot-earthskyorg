@@ -103,7 +103,8 @@ export const main = async (): Promise<void> => {
         Logger.info(`📋 Configuration:`);
         Logger.info(`   • Trade aggregation: ${ENV.TRADE_AGGREGATION_ENABLED ? 'ENABLED' : 'DISABLED'}`);
         Logger.info(`   • 15-minute UpDown trades: ${ENV.ENABLE_15MIN_UPDOWN_TRADES ? 'ENABLED' : 'DISABLED (default)'}`);
-        if (!ENV.ENABLE_15MIN_UPDOWN_TRADES) {
+        Logger.info(`   • 1-hour UpDown trades: ${ENV.ENABLE_1HOUR_UPDOWN_TRADES ? 'ENABLED' : 'DISABLED (default)'}`);
+        if (!ENV.ENABLE_15MIN_UPDOWN_TRADES || !ENV.ENABLE_1HOUR_UPDOWN_TRADES) {
             Logger.info(`     └─ Daily UpDown trades are still processed`);
         }
         Logger.separator();

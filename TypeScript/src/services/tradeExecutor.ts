@@ -1,6 +1,6 @@
 import { ClobClient } from '@polymarket/clob-client';
 import { UserActivityInterface, UserPositionInterface, TradeSide } from '../interfaces/User';
-import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade } from '../config/env';
+import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade, shouldProcess1HourUpDownTrade } from '../config/env';
 import { isDatabaseAvailable } from '../config/db';
 import { getUserActivityModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
@@ -193,6 +193,22 @@ const doTrading = async (clobClient: ClobClient, trades: TradeWithUser[]): Promi
             continue;
         }
 
+        // Skip 1-hour UpDown trades if disabled (daily UpDown trades are not affected)
+        if (!shouldProcess1HourUpDownTrade(trade.slug || trade.asset)) {
+            Logger.info(
+                `⏭️ [1hr UpDown] Skipping 1-hour prediction trade: "${trade.slug || trade.asset}" (disabled by config)`
+            );
+            // Mark as processed so it doesn't appear again (if DB available)
+            if (isDatabaseAvailable()) {
+                const UserActivity = getUserActivityModel(trade.userAddress);
+                await UserActivity.updateOne(
+                    { _id: trade._id },
+                    { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
+                );
+            }
+            continue;
+        }
+
         // Check if this is an UpDown trader
         if (isUpDownTrader(trade.userAddress)) {
             const currentUnix = Math.floor(Date.now() / 1000);
@@ -292,6 +308,24 @@ const doAggregatedTrading = async (
         if (!shouldProcess15MinUpDownTrade(agg.slug || agg.asset)) {
             Logger.info(
                 `⏭️ [15min UpDown] Skipping 15-minute aggregated prediction: "${agg.slug || agg.asset}" (disabled by config)`
+            );
+            // Mark all trades as processed (if DB available)
+            if (isDatabaseAvailable()) {
+                for (const trade of agg.trades) {
+                    const UserActivity = getUserActivityModel(trade.userAddress);
+                    await UserActivity.updateOne(
+                        { _id: trade._id },
+                        { $set: { [DB_FIELDS.BOT_EXECUTED]: true, [DB_FIELDS.BOT_EXECUTED_TIME]: Date.now() } }
+                    );
+                }
+            }
+            continue;
+        }
+
+        // Skip 1-hour UpDown trades if disabled (daily UpDown trades are not affected)
+        if (!shouldProcess1HourUpDownTrade(agg.slug || agg.asset)) {
+            Logger.info(
+                `⏭️ [1hr UpDown] Skipping 1-hour aggregated prediction: "${agg.slug || agg.asset}" (disabled by config)`
             );
             // Mark all trades as processed (if DB available)
             if (isDatabaseAvailable()) {

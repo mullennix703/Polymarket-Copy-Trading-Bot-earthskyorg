@@ -465,6 +465,8 @@ export const ENV = {
     ), // 5 minutes default
     // 15-minute UpDown trades setting (default: disabled to reduce noise)
     ENABLE_15MIN_UPDOWN_TRADES: process.env.ENABLE_15MIN_UPDOWN_TRADES === 'true',
+    // 1-hour UpDown trades setting (default: disabled to reduce noise)
+    ENABLE_1HOUR_UPDOWN_TRADES: process.env.ENABLE_1HOUR_UPDOWN_TRADES === 'true',
     MONGO_URI: process.env.MONGO_URI as string,
     RPC_URL: process.env.RPC_URL as string,
     USDC_CONTRACT_ADDRESS: process.env.USDC_CONTRACT_ADDRESS as string,
@@ -550,4 +552,48 @@ export const shouldProcess15MinUpDownTrade = (slug: string | undefined): boolean
     
     // If it is a 15-minute UpDown trade, check the configuration
     return ENV.ENABLE_15MIN_UPDOWN_TRADES;
+};
+
+/**
+ * Check if a trade slug is a 1-hour UpDown prediction
+ * 1-hour UpDown trades have single times like "4AM ET" without a range
+ * Examples: "Bitcoin Up or Down - January 30, 4AM ET", "Ethereum Up or Down - January 30, 11PM ET"
+ * @param slug The trade slug or title
+ * @returns true if it's a 1-hour interval UpDown trade
+ */
+export const is1HourUpDownTrade = (slug: string | undefined): boolean => {
+    if (!slug) return false;
+    
+    // Check if it contains "Up or Down" (case insensitive)
+    const lowerSlug = slug.toLowerCase();
+    if (!lowerSlug.includes('up or down') && !lowerSlug.includes('updown')) {
+        return false;
+    }
+    
+    // Skip if it's a 15-minute trade (has time range like "4AM-4:15AM")
+    if (is15MinuteUpDownTrade(slug)) {
+        return false;
+    }
+    
+    // 1-hour trades have single times like "4AM ET", "11PM ET"
+    // Pattern: digit(s)AM/PM followed by optional space and ET/timezone
+    // But NOT followed by a dash (which would indicate a range)
+    // Match: "4AM ET", "11PM ET", "12AM", "3PM"
+    const singleTimePattern = /\d{1,2}\s*(am|pm)\s*(et)?\s*["\)]?$/i;
+    return singleTimePattern.test(slug);
+};
+
+/**
+ * Check if a 1-hour UpDown trade should be processed based on configuration
+ * @param slug The trade slug or title
+ * @returns true if the trade should be processed, false if it should be skipped
+ */
+export const shouldProcess1HourUpDownTrade = (slug: string | undefined): boolean => {
+    // If it's not a 1-hour UpDown trade, always process it
+    if (!is1HourUpDownTrade(slug)) {
+        return true;
+    }
+    
+    // If it is a 1-hour UpDown trade, check the configuration
+    return ENV.ENABLE_1HOUR_UPDOWN_TRADES;
 };
