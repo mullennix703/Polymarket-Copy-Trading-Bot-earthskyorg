@@ -99,6 +99,15 @@ export const main = async (): Promise<void> => {
         await connectDB();
         Logger.startup(USER_ADDRESSES, PROXY_WALLET);
 
+        // Display configuration settings
+        Logger.info(`📋 Configuration:`);
+        Logger.info(`   • Trade aggregation: ${ENV.TRADE_AGGREGATION_ENABLED ? 'ENABLED' : 'DISABLED'}`);
+        Logger.info(`   • 15-minute UpDown trades: ${ENV.ENABLE_15MIN_UPDOWN_TRADES ? 'ENABLED' : 'DISABLED (default)'}`);
+        if (!ENV.ENABLE_15MIN_UPDOWN_TRADES) {
+            Logger.info(`     └─ Daily UpDown trades are still processed`);
+        }
+        Logger.separator();
+
         // Perform initial health check
         Logger.info('Performing initial health check...');
         const healthResult = await performHealthCheck();

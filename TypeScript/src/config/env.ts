@@ -62,7 +62,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x961afce6bd9aec79c5cf09d2d4dac2b434b23361', name: 'CRYINGLITTLEBABY', category: 'UpDown' },
     // { address: '0x1ff49fdcb6685c94059b65620f43a683be0ce7a5', name: 'ca6859f3c004bff' },
     { address: '0x818f214c7f3e479cce1d964d53fe3db7297558cb', name: 'livebreathevolatility', category: 'UpDown' },
-    { address: '0xf247584e41117bbbe4cc06e4d2c95741792a5216', name: '0xf247...a5216', category: 'UpDown' },
+    { address: '0xf247584e41117bbbe4cc06e4d2c95741792a5216', name: '0xf247584e41117bbBe4Cc06E4d2C95741792a5216-1742469835200', category: 'UpDown' },
     { address: '0xd0d6053c3c37e727402d84c14069780d360993aa', name: 'k9Q2mX4L8A7ZP3R', category: 'UpDown' },
     { address: '0x63ce342161250d705dc0b16df89036c8e5f9ba9a', name: '0x8dxd', category: 'UpDown' },
     { address: '0x000d257d2dc7616feaef4ae0f14600fdf50a758e', name: 'scottilicious', category: 'Politics' },
@@ -463,6 +463,8 @@ export const ENV = {
         process.env.TRADE_AGGREGATION_WINDOW_SECONDS || '300',
         10
     ), // 5 minutes default
+    // 15-minute UpDown trades setting (default: disabled to reduce noise)
+    ENABLE_15MIN_UPDOWN_TRADES: process.env.ENABLE_15MIN_UPDOWN_TRADES === 'true',
     MONGO_URI: process.env.MONGO_URI as string,
     RPC_URL: process.env.RPC_URL as string,
     USDC_CONTRACT_ADDRESS: process.env.USDC_CONTRACT_ADDRESS as string,
@@ -512,3 +514,40 @@ export const getTraderCategory = (address: string): string | undefined => {
  * Trades older than this are considered too stale to copy for UpDown traders
  */
 export const UPDOWN_STALENESS_THRESHOLD_SECONDS = 15 * 60; // 15 minutes
+
+/**
+ * Check if a trade slug is a 15-minute UpDown prediction
+ * 15-minute UpDown trades have time ranges like "2:30AM-2:45AM" in the slug
+ * Daily UpDown trades don't have time ranges, just dates like "January 30"
+ * @param slug The trade slug or title
+ * @returns true if it's a 15-minute interval UpDown trade
+ */
+export const is15MinuteUpDownTrade = (slug: string | undefined): boolean => {
+    if (!slug) return false;
+    
+    // Check if it contains "Up or Down" (case insensitive)
+    const lowerSlug = slug.toLowerCase();
+    if (!lowerSlug.includes('up or down') && !lowerSlug.includes('updown')) {
+        return false;
+    }
+    
+    // 15-minute trades have time ranges like "2:30AM-2:45AM", "11:00PM-11:15PM"
+    // Pattern: digit(s):digit(s)AM/PM-digit(s):digit(s)AM/PM
+    const timeRangePattern = /\d{1,2}:\d{2}\s*(am|pm)\s*-\s*\d{1,2}:\d{2}\s*(am|pm)/i;
+    return timeRangePattern.test(slug);
+};
+
+/**
+ * Check if a 15-minute UpDown trade should be processed based on configuration
+ * @param slug The trade slug or title
+ * @returns true if the trade should be processed, false if it should be skipped
+ */
+export const shouldProcess15MinUpDownTrade = (slug: string | undefined): boolean => {
+    // If it's not a 15-minute UpDown trade, always process it
+    if (!is15MinuteUpDownTrade(slug)) {
+        return true;
+    }
+    
+    // If it is a 15-minute UpDown trade, check the configuration
+    return ENV.ENABLE_15MIN_UPDOWN_TRADES;
+};

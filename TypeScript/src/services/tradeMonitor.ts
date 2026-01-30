@@ -1,4 +1,4 @@
-import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS } from '../config/env';
+import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade, is15MinuteUpDownTrade } from '../config/env';
 import { isDatabaseAvailable } from '../config/db';
 import { getUserActivityModel, getUserPositionModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
@@ -12,6 +12,8 @@ const FETCH_INTERVAL = ENV.FETCH_INTERVAL;
 
 // Track logged stale UpDown trades to prevent duplicate logging
 const loggedStaleUpDownTrades = new Set<string>();
+// Track logged skipped 15-minute UpDown trades to prevent duplicate logging
+const loggedSkipped15MinTrades = new Set<string>();
 
 if (!USER_ADDRESSES || USER_ADDRESSES.length === 0) {
     throw new Error('USER_ADDRESSES is not defined or empty');
@@ -167,6 +169,18 @@ const processTrader = async (
     for (const activity of activities) {
         // Skip if too old
         if (activity.timestamp < cutoffTimestamp) {
+            continue;
+        }
+
+        // Skip 15-minute UpDown trades if disabled (daily UpDown trades are not affected)
+        // This is checked before UpDown trader logic to filter out 15-min noise from all traders
+        // Check both title and slug since API may populate either field
+        const tradeIdentifier = activity.title || activity.slug || '';
+        if (!shouldProcess15MinUpDownTrade(tradeIdentifier)) {
+            // Only log once per transaction (silently skip to reduce noise)
+            if (!loggedSkipped15MinTrades.has(activity.transactionHash)) {
+                loggedSkipped15MinTrades.add(activity.transactionHash);
+            }
             continue;
         }
 
