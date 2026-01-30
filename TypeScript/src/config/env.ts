@@ -84,6 +84,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x4b92a2d2fd3807981a5dddae7315122530a542e6', name: 'wisser', category: 'Politics' },
     { address: '0x89e75fd541c6cb6549f13e98c78b971c8f3e50e9', name: 'ClaudeAI', category: 'Politics' },
     { address: '0x204f72f35326db932158cba6adff0b9a1da95e14', name: 'swisstony', category: 'Sports' },
+    { address: '0xdd9ed02bb67b2ec504be24b98febd651fdac49b3', name: 'Pedro-Messi', category: 'Sports' },
 ];
 
 // Create address to name mapping for quick lookup
