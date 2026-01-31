@@ -167,14 +167,24 @@ class Logger {
         }
         console.log(chalk.magenta('─'.repeat(70)) + '\n');
 
-        // Log to file
-        let tradeLog = `TRADE: ${this.formatAddress(traderAddress)} - ${action}`;
-        if (details.side) tradeLog += ` | Side: ${details.side}`;
-        if (details.amount) tradeLog += ` | Amount: $${details.amount}`;
-        if (details.price) tradeLog += ` | Price: ${details.price}`;
-        if (details.title) tradeLog += ` | Market: ${details.title}`;
-        if (details.transactionHash) tradeLog += ` | TX: ${details.transactionHash}`;
+        // Log to file - write detailed multi-line format
+        const tradeLog = [
+            `TRADE DETECTED - ${this.formatTraderAddress(traderAddress)}`,
+            `  Action: ${action}`,
+            details.asset ? `  Asset: ${this.formatAddress(details.asset)}` : null,
+            details.side ? `  Side: ${details.side}` : null,
+            details.amount ? `  Amount: $${details.amount}` : null,
+            details.price ? `  Price: ${details.price}` : null,
+            details.title ? `  Market: ${details.title}` : null,
+            details.eventSlug ? `  Market URL: https://polymarket.com/event/${details.eventSlug}` : null,
+            details.transactionHash ? `  TX: ${details.transactionHash}` : null,
+            details.transactionHash ? `  TX URL: https://polygonscan.com/tx/${details.transactionHash}` : null,
+            details.timestamp ? `  Trade Time: ${new Date(details.timestamp * 1000).toISOString()}` : null,
+            details.timestamp ? `  Latency: ${((Date.now() - details.timestamp * 1000) / 1000).toFixed(1)}s` : null,
+        ].filter(line => line !== null).join('\n');
+        
         this.writeToFile(tradeLog);
+        this.writeToFile('─'.repeat(70)); // Separator line
     }
 
     static balance(myBalance: number, traderBalance: number, traderAddress: string) {
