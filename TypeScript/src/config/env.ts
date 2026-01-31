@@ -20,6 +20,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', name: 'Car' },
     { address: '0xd218e474776403a330142299f7796e8ba32eb5c9', name: 'cigarettes' },
     { address: '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', name: 'Dropper', category: 'Politics' },
+    { address: '0xdfe3fedc5c7679be42c3d393e99d4b55247b73c4', name: 'cqs', category: 'Politics' },
     { address: '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', name: 'HolyMoses7', category: 'Politics' },
     // { address: '0x8545ff3521691618f2d5e4f5460d76186a5023be', name: '1KChallenge' },
     { address: '0x751a2b86cab503496efd325c8344e10159349ea1', name: 'Sharky6999', category: 'UpDown' },
