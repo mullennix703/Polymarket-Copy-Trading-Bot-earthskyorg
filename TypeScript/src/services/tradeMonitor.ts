@@ -9,6 +9,7 @@ import { UserPositionInterface, UserActivityInterface } from '../interfaces/User
 const USER_ADDRESSES = ENV.USER_ADDRESSES;
 const TOO_OLD_TIMESTAMP = ENV.TOO_OLD_TIMESTAMP;
 const FETCH_INTERVAL = ENV.FETCH_INTERVAL;
+const HISTORICAL_SYNC_WINDOW_MINUTES = ENV.HISTORICAL_SYNC_WINDOW_MINUTES;
 
 // Track logged stale UpDown trades to prevent duplicate logging
 // Use composite key: address + conditionId + type + approximate timestamp (rounded to hour)
@@ -162,17 +163,18 @@ const processTrader = async (
     UserActivity: ReturnType<typeof getUserActivityModel>,
     UserPosition: ReturnType<typeof getUserPositionModel>
 ): Promise<void> => {
-    // Fetch trade activities from Polymarket API
-    const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
+    // Calculate cutoff timestamp once per trader (current time - TOO_OLD_TIMESTAMP hours)
+    const currentUnix = Math.floor(Date.now() / 1000);
+    const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
+    
+    // Fetch trade activities from Polymarket API with since parameter for efficiency
+    // Only fetch trades from the last TOO_OLD_TIMESTAMP hours (older ones would be skipped anyway)
+    const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}&since=${cutoffTimestamp}`;
     const activities = await fetchData<UserActivityInterface[]>(apiUrl);
 
     if (!Array.isArray(activities) || activities.length === 0) {
         return;
     }
-
-    // Calculate cutoff timestamp once per trader (current time - TOO_OLD_TIMESTAMP hours)
-    const currentUnix = Math.floor(Date.now() / 1000);
-    const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
     
     // Check if this is an UpDown trader (short-term crypto price predictions)
     const isUpDown = isUpDownTrader(address);
@@ -446,30 +448,46 @@ const tradeMonitor = async (): Promise<void> => {
             }
             
             // Fetch all current trades from API and save them as already processed
+            const syncStartTime = Date.now();
+            let totalSynced = 0;
+            // Calculate since timestamp for historical sync (configurable window, default 30 minutes)
+            const historicalSinceTimestamp = Math.floor(Date.now() / 1000) - HISTORICAL_SYNC_WINDOW_MINUTES * 60;
+            
             for (const { address, UserActivity } of userModels) {
                 // Skip database sync for UpDown traders (they don't save to DB)
                 if (isUpDownTrader(address)) {
                     continue;
                 }
                 
+                const traderStartTime = Date.now();
+                let savedCount = 0;
+                
                 try {
-                    const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}`;
+                    const apiUrl = `${POLYMARKET_API.DATA_API_BASE}${POLYMARKET_API.ACTIVITY_ENDPOINT}?user=${address}&type=${DB_FIELDS.TYPE_TRADE}&since=${historicalSinceTimestamp}`;
                     const activities = await fetchData<UserActivityInterface[]>(apiUrl);
                     
                     if (Array.isArray(activities) && activities.length > 0) {
                         const currentUnix = Math.floor(Date.now() / 1000);
                         const cutoffTimestamp = currentUnix - TOO_OLD_TIMESTAMP * 3600;
                         
-                        let savedCount = 0;
-                        for (const activity of activities) {
-                            if (activity.timestamp < cutoffTimestamp) continue;
+                        // Filter activities by timestamp first
+                        const validActivities = activities.filter(a => a.timestamp >= cutoffTimestamp);
+                        
+                        if (validActivities.length > 0) {
+                            // Batch query: get all existing transaction hashes in one query
+                            const txHashes = validActivities.map(a => a.transactionHash);
+                            const existingActivities = await UserActivity.find({
+                                transactionHash: { $in: txHashes }
+                            }).select('transactionHash').lean().exec();
                             
-                            const existingActivity = await UserActivity.findOne({
-                                transactionHash: activity.transactionHash,
-                            }).exec();
+                            const existingHashes = new Set(existingActivities.map((a: any) => a.transactionHash));
                             
-                            if (!existingActivity) {
-                                const newActivity = new UserActivity({
+                            // Filter to only new activities
+                            const newActivities = validActivities.filter(a => !existingHashes.has(a.transactionHash));
+                            
+                            // Batch insert all new activities at once
+                            if (newActivities.length > 0) {
+                                const documents = newActivities.map(activity => ({
                                     proxyWallet: activity.proxyWallet,
                                     timestamp: activity.timestamp,
                                     conditionId: activity.conditionId,
@@ -483,32 +501,36 @@ const tradeMonitor = async (): Promise<void> => {
                                     outcomeIndex: activity.outcomeIndex,
                                     title: activity.title,
                                     slug: activity.slug,
-                                icon: activity.icon,
-                                eventSlug: activity.eventSlug,
-                                outcome: activity.outcome,
-                                name: activity.name,
-                                pseudonym: activity.pseudonym,
-                                bio: activity.bio,
-                                profileImage: activity.profileImage,
-                                profileImageOptimized: activity.profileImageOptimized,
-                                bot: true,  // Mark as already processed
-                                botExcutedTime: 999,  // Mark as historical
-                            });
-                            await newActivity.save();
-                            savedCount++;
+                                    icon: activity.icon,
+                                    eventSlug: activity.eventSlug,
+                                    outcome: activity.outcome,
+                                    name: activity.name,
+                                    pseudonym: activity.pseudonym,
+                                    bio: activity.bio,
+                                    profileImage: activity.profileImage,
+                                    profileImageOptimized: activity.profileImageOptimized,
+                                    bot: true,  // Mark as already processed
+                                    botExcutedTime: 999,  // Mark as historical
+                                }));
+                                
+                                await UserActivity.insertMany(documents, { ordered: false });
+                                savedCount = newActivities.length;
+                            }
                         }
                     }
                     
                     if (savedCount > 0) {
                         Logger.info(
-                            `Synced ${savedCount} historical trades for ${address.slice(0, 6)}...${address.slice(-4)}`
+                            `Synced ${savedCount} historical trades for ${address.slice(0, 6)}...${address.slice(-4)} (${Date.now() - traderStartTime}ms)`
                         );
                     }
+                    totalSynced += savedCount;
+                } catch (error) {
+                    Logger.warning(`Failed to sync historical trades for ${address.slice(0, 6)}...${address.slice(-4)}`);
                 }
-            } catch (error) {
-                Logger.warning(`Failed to sync historical trades for ${address.slice(0, 6)}...${address.slice(-4)}`);
             }
-        }
+        
+            Logger.info(`⏱️ Historical sync completed: ${totalSynced} trades synced in ${Date.now() - syncStartTime}ms (window: ${HISTORICAL_SYNC_WINDOW_MINUTES} minutes)`);
         
             // Also mark any existing unprocessed trades in DB (skip UpDown traders)
             for (const { address, UserActivity } of userModels) {

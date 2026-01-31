@@ -27,6 +27,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xd0d6053c3c37e727402d84c14069780d360993aa', name: 'k9Q2mX4L8A7ZP3R', category: 'UpDown' },
     // { address: '0x134240c2a99fa2a1cd9db6fc2caa65043259c997', name: '1j59y6nk' },
     { address: '0xfeb581080aee6dc26c264a647b30a9cd44d5a393', name: 'completion', category: 'UpDown' },
+    { address: '0xf705fa045201391d9632b7f3cde06a5e24453ca7', name: '0xf705fa045201391d9632b7f3cde06a5e24453ca7', category: 'UpDown' },
     { address: '0xe3726a1b9c6ba2f06585d1c9e01d00afaedaeb38', name: 'cry.eth2', category: 'Politics' },
     { address: '0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1', name: 'aenews2', category: 'Politics' },
     { address: '0x4959175440b8f38229b32f2f036057f6893ea6f5', name: 'Majas' },
@@ -69,7 +70,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x0b9cae2b0dfe7a71c413e0604eaac1c352f87e44', name: 'MCgenius', category: 'Politics' },
     { address: '0x6954d3e807749511e79f6f6c1cfe53a3be549fd8', name: '0x6954D3E807749511E79F6F6C1cFE53A3BE549fd8', category: 'Politics' },
     { address: '0xd1c769317bd15de7768a70d0214cf0bbcc531d2b', name: '033033033', category: 'Politics' },
-    { address: '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', name: 'ImJustKen' },
+    { address: '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', name: 'ImJustKen', category: 'Politics' },
     { address: '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', name: 'crispy-avocado', category: 'Sports' },
     { address: '0xa9878e59934ab507f9039bcb917c1bae0451141d', name: 'ilovecircle', category: 'Sports' },
     { address: '0x336848a1a1cb00348020c9457676f34d882f21cd', name: '0x3368...f21cd', category: 'UpDown' },
@@ -85,6 +86,8 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x89e75fd541c6cb6549f13e98c78b971c8f3e50e9', name: 'ClaudeAI', category: 'Politics' },
     { address: '0x204f72f35326db932158cba6adff0b9a1da95e14', name: 'swisstony', category: 'Sports' },
     { address: '0xdd9ed02bb67b2ec504be24b98febd651fdac49b3', name: 'Pedro-Messi', category: 'Sports' },
+    { address: '0x2005d16a84ceefa912d4e380cd32e7ff827875ea', name: 'RN1', category: 'Sports' },
+    { address: '0x43372356634781eea88d61bbdd7824cdce958882', name: 'Anjun', category: 'Sports' },
 ];
 
 // Create address to name mapping for quick lookup
@@ -464,6 +467,11 @@ export const ENV = {
         process.env.TRADE_AGGREGATION_WINDOW_SECONDS || '300',
         10
     ), // 5 minutes default
+    // Historical sync window (minutes) - only sync trades within this window on startup
+    HISTORICAL_SYNC_WINDOW_MINUTES: parseInt(
+        process.env.HISTORICAL_SYNC_WINDOW_MINUTES || '30',
+        10
+    ), // 30 minutes default
     // 15-minute UpDown trades setting (default: disabled to reduce noise)
     ENABLE_15MIN_UPDOWN_TRADES: process.env.ENABLE_15MIN_UPDOWN_TRADES === 'true',
     // 1-hour UpDown trades setting (default: disabled to reduce noise)
