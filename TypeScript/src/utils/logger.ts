@@ -6,6 +6,8 @@ import { formatAddressWithName } from '../config/env';
 class Logger {
     private static logsDir = path.join(process.cwd(), 'logs');
     private static currentLogFile = '';
+    private static readonly MAX_LOG_SIZE = 50 * 1024 * 1024; // 50MB per file
+    private static readonly MAX_LOG_FILES = 7; // Keep 7 rotated files
 
     private static getLogFileName(): string {
         const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
@@ -22,11 +24,46 @@ class Logger {
         try {
             this.ensureLogsDir();
             const logFile = this.getLogFileName();
+            
+            // Check file size and rotate if needed
+            if (fs.existsSync(logFile)) {
+                const stats = fs.statSync(logFile);
+                if (stats.size > this.MAX_LOG_SIZE) {
+                    this.rotateLogFile(logFile);
+                }
+            }
+            
             const timestamp = new Date().toISOString();
             const logEntry = `[${timestamp}] ${message}\n`;
             fs.appendFileSync(logFile, logEntry, 'utf8');
         } catch (error) {
             // Silently fail to avoid infinite loops
+        }
+    }
+
+    private static rotateLogFile(currentFile: string): void {
+        try {
+            const base = currentFile.replace('.log', '');
+            
+            // Delete oldest file if exists
+            const oldestFile = `${base}.${this.MAX_LOG_FILES}.log`;
+            if (fs.existsSync(oldestFile)) {
+                fs.unlinkSync(oldestFile);
+            }
+            
+            // Rename existing rotated files (shift numbers up)
+            for (let i = this.MAX_LOG_FILES - 1; i > 0; i--) {
+                const oldFile = `${base}.${i}.log`;
+                const newFile = `${base}.${i + 1}.log`;
+                if (fs.existsSync(oldFile)) {
+                    fs.renameSync(oldFile, newFile);
+                }
+            }
+            
+            // Rename current file to .1.log
+            fs.renameSync(currentFile, `${base}.1.log`);
+        } catch (error) {
+            // Silently fail to avoid breaking the app
         }
     }
 
