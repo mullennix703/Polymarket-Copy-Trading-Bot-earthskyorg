@@ -141,7 +141,7 @@ const init = async (): Promise<void> => {
                 details: topPositions,
             };
         } catch (error) {
-            Logger.warning(`Failed to load positions for ${address.slice(0, 6)}...${address.slice(-4)}`);
+            Logger.warning(`Failed to load positions for ${getTraderName(address)}`);
             return { count: 0, profitability: 0, details: [] as UserPositionInterface[] };
         }
     });
@@ -241,7 +241,7 @@ const processTrader = async (
             const now = Date.now();
             const latency = ((now - activity.timestamp * 1000) / 1000).toFixed(1);
             Logger.info(
-                `[${new Date(now).toLocaleString()}] 📡 Trade detected for ${address.slice(0, 6)}...${address.slice(-4)} (DB unavailable, skipping save) - Latency: ${latency}s`
+                `[${new Date(now).toLocaleString()}] 📡 Trade detected for ${traderName} (DB unavailable, skipping save) - Latency: ${latency}s`
             );
             continue;
         }
@@ -286,7 +286,7 @@ const processTrader = async (
         const now = Date.now();
         const latency = ((now - activity.timestamp * 1000) / 1000).toFixed(1);
         Logger.info(
-            `[${new Date(now).toLocaleString()}] New trade detected for ${address.slice(0, 6)}...${address.slice(-4)} (Latency: ${latency}s)`
+            `[${new Date(now).toLocaleString()}] New trade detected for ${traderName} (Latency: ${latency}s)`
         );
     }
 
@@ -342,7 +342,7 @@ const processTrader = async (
         .catch((error) => {
             // Only log if not a connection error (to reduce noise when DB is unavailable)
             if (isDatabaseAvailable()) {
-                Logger.warning(`Position update failed for ${address.slice(0, 6)}...${address.slice(-4)}: ${error}`);
+                Logger.warning(`Position update failed for ${getTraderName(address)}: ${error}`);
             }
         });
 };
@@ -369,7 +369,7 @@ const fetchTradeData = async (): Promise<void> => {
             if (result.status === 'rejected') {
                 const address = batch[index].address;
                 Logger.error(
-                    `Error fetching data for ${address.slice(0, 6)}...${address.slice(-4)}: ${result.reason}`
+                    `Error fetching data for ${getTraderName(address)}: ${result.reason}`
                 );
             }
         });
@@ -521,12 +521,12 @@ const tradeMonitor = async (): Promise<void> => {
                     
                     if (savedCount > 0) {
                         Logger.info(
-                            `Synced ${savedCount} historical trades for ${address.slice(0, 6)}...${address.slice(-4)} (${Date.now() - traderStartTime}ms)`
+                            `Synced ${savedCount} historical trades for ${getTraderName(address)} (${Date.now() - traderStartTime}ms)`
                         );
                     }
                     totalSynced += savedCount;
                 } catch (error) {
-                    Logger.warning(`Failed to sync historical trades for ${address.slice(0, 6)}...${address.slice(-4)}`);
+                    Logger.warning(`Failed to sync historical trades for ${getTraderName(address)}`);
                 }
             }
         
