@@ -38,7 +38,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x9c5455d1ff77d42fd093511a2e3a5d3d53f8a525', name: 'cramschool', category: 'UpDown' },
     { address: '0xf2f6af4f27ec2dcf4072095ab804016e14cd5817', name: 'gopfan2', category: 'Politics' },
     { address: '0x6139c42e48cf190e67a0a85d492413b499336b7a', name: 'RememberAmalek', category: 'Politics' },
-    { address: '0x594edb9112f526fa6a80b8f858a6379c8a2c1c11', name: '0x594e...c1c11', category: 'Weather' },
+    { address: '0x594edb9112f526fa6a80b8f858a6379c8a2c1c11', name: '0x594edB9112f526Fa6A80b8F858A6379C8A2c1C11-1762688003124', category: 'Weather' },
     { address: '0x9977760c6bd6f824cac834d1a36ee99478d63020', name: 'meropi', category: 'Weather' },
     { address: '0xbdcd1a99e6880b8146f61323dcb799bb5b243e9c', name: '1pixel', category: 'Weather' },
     { address: '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', name: 'Hans323', category: 'Weather' },
