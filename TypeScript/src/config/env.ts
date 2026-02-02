@@ -24,6 +24,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', name: 'HolyMoses7', category: 'Politics' },
     // { address: '0x8545ff3521691618f2d5e4f5460d76186a5023be', name: '1KChallenge' },
     { address: '0x751a2b86cab503496efd325c8344e10159349ea1', name: 'Sharky6999', category: 'UpDown' },
+    { address: '0x1461cc6e1a05e20710c416307db62c28f1d122d8', name: '0x1461cC6e1A05e20710c416307Db62C28f1D122d8-1769439228231', category: 'UpDown' },
     { address: '0xe9c6312464b52aa3eff13d822b003282075995c9', name: 'kingofcoinflips', category: 'UpDown' },
     { address: '0xd0d6053c3c37e727402d84c14069780d360993aa', name: 'k9Q2mX4L8A7ZP3R', category: 'UpDown' },
     // { address: '0x134240c2a99fa2a1cd9db6fc2caa65043259c997', name: '1j59y6nk' },
