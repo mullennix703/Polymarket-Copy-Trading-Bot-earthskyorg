@@ -23,6 +23,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xfb81f27f1c8758d477332f8e751322c424da1cf3', name: 'CiderApple' },
     { address: '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', name: 'Dropper', category: 'Politics' },
     { address: '0xdfe3fedc5c7679be42c3d393e99d4b55247b73c4', name: 'cqs', category: 'Politics' },
+    { address: '0x909fa9f89976058b8b3ab87adc502ec7415ea8c3', name: 'BAdiosB', category: 'Politics' },
     { address: '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', name: 'HolyMoses7', category: 'Politics' },
     { address: '0x2785e7022dc20757108204b13c08cea8613b70ae', name: 'poorsob', category: 'Politics' },
     { address: '0x7072dd52161bae614bec6905846a53c9a3a53413', name: 'ForesightOracle', category: 'Politics' },
