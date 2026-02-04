@@ -10,18 +10,24 @@ dotenv.config();
 interface TraderInfo {
     address: string;
     name: string;
-    category?: 'UpDown' | 'Politics' | 'Sports' | 'Weather' | 'Other';
+    category?: 'UpDown' | 'Politics' | 'Sports' | 'Weather'| 'HighTech'| 'Finance'  | 'Other';
 }
 
 const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', name: 'kch123', category: 'Sports' },
     { address: '0xee00ba338c59557141789b127927a55f5cc5cea1', name: 'S-Works', category: 'Sports' },
+    { address: '0x161eb16874e34f545991e774b4e1ac5b65f86ef0', name: 'piston777', category: 'Sports' },
     { address: '0x20d6436849f930584892730c7f96ebb2ac763856', name: '0x20D6436849F930584892730C7F96eBB2Ac763856-1768642056357', category: 'Sports' },
     { address: '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', name: 'Car' },
     { address: '0x689ae12e11aa489adb3605afd8f39040ff52779e', name: 'Annica' },
     { address: '0xd218e474776403a330142299f7796e8ba32eb5c9', name: 'cigarettes' },
     { address: '0xfb81f27f1c8758d477332f8e751322c424da1cf3', name: 'CiderApple' },
+    { address: '0xa3e9a711841e655def080044768452b60f4263d0', name: 'petercrouch' }, //prelaunch
+    { address: '0xee50a31c3f5a7c77824b12a941a54388a2827ed6', name: '0xafEe', category: 'HighTech'  }, 
+    { address: '0x8278252ebbf354eca8ce316e680a0eaf02859464', name: '0xf2e346ab', category: 'Finance'  }, 
+    { address: '0xdefebc7ed6f5d6e8710398f37eea6fc1746a17f4', name: 'e25247f2da2a2462f03c936c379b7ab0', category: 'Finance'  }, 
     { address: '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', name: 'Dropper', category: 'Politics' },
+    { address: '0x12d6cccfc7470a3f4bafc53599a4779cbf2cf2a8', name: 'classified', category: 'Politics' },
     { address: '0x96489abcb9f583d6835c8ef95ffc923d05a86825', name: 'anoin123', category: 'Politics' },
     { address: '0x71edffd0d70a1da823ff07a3c6fc81457294d338', name: 'pako', category: 'Politics' },
     { address: '0xd5ccdf772f795547e299de57f47966e24de8dea4', name: 'tsybka', category: 'Politics' },
@@ -30,6 +36,8 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', name: 'HolyMoses7', category: 'Politics' },
     { address: '0x2785e7022dc20757108204b13c08cea8613b70ae', name: 'poorsob', category: 'Politics' },
     { address: '0x7072dd52161bae614bec6905846a53c9a3a53413', name: 'ForesightOracle', category: 'Politics' },
+    { address: '0x1c12abb42d0427e70e144ae67c92951b232f79d9', name: 'WickRick', category: 'Politics' }, //insider
+    { address: '0x9b979a065641e8cfde3022a30ed2d9415cf55e12', name: 'LlamaEnjoyer', category: 'Politics' },
     // { address: '0x8545ff3521691618f2d5e4f5460d76186a5023be', name: '1KChallenge' },
     { address: '0x751a2b86cab503496efd325c8344e10159349ea1', name: 'Sharky6999', category: 'UpDown' },
     { address: '0x7f3c8979d0afa00007bae4747d5347122af05613', name: 'LucasMeow', category: 'UpDown' },
@@ -54,7 +62,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x9977760c6bd6f824cac834d1a36ee99478d63020', name: 'meropi', category: 'Weather' },
     { address: '0xbdcd1a99e6880b8146f61323dcb799bb5b243e9c', name: '1pixel', category: 'Weather' },
     { address: '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', name: 'Hans323', category: 'Weather' },
-    { address: '0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11', name: 'automatedAItradingbot' },
+    { address: '0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11', name: 'automatedAItradingbot', category: 'Weather'  },
     { address: '0x9d3e989dd42030664e6157dae42f6d549542c49e', name: '0x9d3e...2c49e', category: 'Weather' },
     { address: '0x6297b93ea37ff92a57fd636410f3b71ebf74517e', name: 'neobrother', category: 'Weather' },
     { address: '0x08cf0b0fec3d42d9920bb0dfbc49fde635088cbc', name: 'HondaCivic', category: 'Weather' },
@@ -63,16 +71,19 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x0b219cf3d297991b58361dbebdbaa91e56b8deb6', name: 'TerreMoto', category: 'Politics' },
     { address: '0x589222a5124a96765443b97a3498d89ffd824ad2', name: 'PurpleThunderBicycleMountain', category: 'UpDown' },
     { address: '0x1f0a343513aa6060488fabe96960e6d1e177f7aa', name: 'archaic', category: 'Politics' },
-    { address: '0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f', name: '0x40e1...D973f', category: 'Politics' },
+    { address: '0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f', name: '0x40e1D00D3A43aF1C4f215bD7A1039cc792AD973f-1757776033081', category: 'Politics' },
+    { address: '0x1eb7682b8ba84111cf8b30d6a646f1e8a3b46a08', name: 'LilRto', category: 'Politics' },
     { address: '0xe00740bce98a594e26861838885ab310ec3b548c', name: 'distinct-baguette', category: 'UpDown' },
-    { address: '0x01542a212c9696da5b409cae879143b8966115a8', name: '0x0154...115a8', category: 'UpDown' },
+    { address: '0x01542a212c9696da5b409cae879143b8966115a8', name: '0x01542a212c9696da5b409cae879143b89661', category: 'UpDown' },
     { address: '0x090a0d3fc9d68d3e16db70e3460e3e4b510801b4', name: 'slight-', category: 'Politics' },
     { address: '0x80f8b674265a2915b51f566c3a011db08ca3abc9', name: 'Atg1', category: 'Politics' },
     { address: '0x6baf05d193692bb208d616709e27442c910a94c5', name: 'SBet365', category: 'Politics' },
     { address: '0x6d7776a0f954be1a7c975a1e8244de6268f7b72c', name: 'humanbeans', category: 'Politics' },
     { address: '0xb6bed94e75c333dae24eb9c80b3fef47ef3cfcfe', name: 'DickTurbin', category: 'Politics' },
+    { address: '0x6c979ffcc3528a5d2395a2f7c89135711da0988c', name: '7G-MAN', category: 'Politics' },
     { address: '0x79add3f87e377b0899b935472c07d2c3816ba9f1', name: 'lmtfalone', category: 'Politics' },
     { address: '0x858d551d073e9c647c17079ad9021de830201047', name: 'flipfloppity', category: 'Sports' },
+    { address: '0xb8e6281d22dc80e08885ebc7d819da9bf8cdd504', name: 'ball52759', category: 'Sports' },
     { address: '0x961afce6bd9aec79c5cf09d2d4dac2b434b23361', name: 'CRYINGLITTLEBABY', category: 'UpDown' },
     // { address: '0x1ff49fdcb6685c94059b65620f43a683be0ce7a5', name: 'ca6859f3c004bff' },
     { address: '0x818f214c7f3e479cce1d964d53fe3db7297558cb', name: 'livebreathevolatility', category: 'UpDown' },
@@ -84,10 +95,11 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x6954d3e807749511e79f6f6c1cfe53a3be549fd8', name: '0x6954D3E807749511E79F6F6C1cFE53A3BE549fd8', category: 'Politics' },
     { address: '0xd1c769317bd15de7768a70d0214cf0bbcc531d2b', name: '033033033', category: 'Politics' },
     { address: '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', name: 'ImJustKen', category: 'Politics' },
+    { address: '0x03626d34381b0337387b0e8464c898f772009661', name: 'Axios', category: 'Politics' },
     { address: '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', name: 'crispy-avocado', category: 'Sports' },
     { address: '0xa9878e59934ab507f9039bcb917c1bae0451141d', name: 'ilovecircle', category: 'Sports' },
     { address: '0x336848a1a1cb00348020c9457676f34d882f21cd', name: '0x3368...f21cd', category: 'UpDown' },
-    { address: '0x22e4248bdb066f65c9f11cd66cdd3719a28eef1c', name: 'ProfessionalPunter' },
+    { address: '0x22e4248bdb066f65c9f11cd66cdd3719a28eef1c', name: 'ProfessionalPunter', category: 'HighTech' },
     { address: '0xcc500cbcc8b7cf5bd21975ebbea34f21b5644c82', name: 'justdance', category: 'UpDown' },
     { address: '0x55be7aa03ecfbe37aa5460db791205f7ac9ddca3', name: 'coinman2', category: 'UpDown' },
     { address: '0xe9c6312464b52aa3eff13d822b003282075995c9', name: 'kingofcoinflips' },
