@@ -96,6 +96,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xd1c769317bd15de7768a70d0214cf0bbcc531d2b', name: '033033033', category: 'Politics' },
     { address: '0x9d84ce0306f8551e02efef1680475fc0f1dc1344', name: 'ImJustKen', category: 'Politics' },
     { address: '0x03626d34381b0337387b0e8464c898f772009661', name: 'Axios', category: 'Politics' },
+    { address: '0x641b56cd1de69da37e9bfefeddc7b277341c5433', name: 'Newsance', category: 'Politics' },
     { address: '0xca3f77cb090cf7cbcf48bcf865e8f27364418078', name: 'crispy-avocado', category: 'Sports' },
     { address: '0xa9878e59934ab507f9039bcb917c1bae0451141d', name: 'ilovecircle', category: 'Sports' },
     { address: '0x336848a1a1cb00348020c9457676f34d882f21cd', name: '0x3368...f21cd', category: 'UpDown' },
