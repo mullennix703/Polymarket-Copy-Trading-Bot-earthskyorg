@@ -65,7 +65,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0xbdcd1a99e6880b8146f61323dcb799bb5b243e9c', name: '1pixel', category: 'Weather' },
     { address: '0x0f37cb80dee49d55b5f6d9e595d52591d6371410', name: 'Hans323', category: 'Weather' },
     { address: '0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11', name: 'automatedAItradingbot', category: 'Weather'  },
-    { address: '0x9d3e989dd42030664e6157dae42f6d549542c49e', name: '0x9d3e...2c49e', category: 'Weather' },
+    { address: '0x9d3e989dd42030664e6157dae42f6d549542c49e', name: '0x9D3E989DD42030664e6157DAE42f6d549542C49E-1760165563991', category: 'Weather' },
     { address: '0x6297b93ea37ff92a57fd636410f3b71ebf74517e', name: 'neobrother', category: 'Weather' },
     { address: '0x08cf0b0fec3d42d9920bb0dfbc49fde635088cbc', name: 'HondaCivic', category: 'Weather' },
     { address: '0xb43699cbbb52520952833c10737bc43e7625bb3c', name: 'DOJ', category: 'Sports' },
