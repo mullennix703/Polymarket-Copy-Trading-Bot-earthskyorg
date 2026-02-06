@@ -22,7 +22,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', name: 'Car' },
     { address: '0xb2caffc47672b897121b4f4a5dbe1ee75fbf0ac2', name: 'EveryMoleIsMagic' },
     { address: '0x689ae12e11aa489adb3605afd8f39040ff52779e', name: 'Annica' },
-    { address: '0xd218e474776403a330142299f7796e8ba32eb5c9', name: 'cigarettes' },
+    { address: '0xd218e474776403a330142299f7796e8ba32eb5c9', name: 'cigarettes', category: 'Sports'  },
     { address: '0xfb81f27f1c8758d477332f8e751322c424da1cf3', name: 'CiderApple' },
     { address: '0xa3e9a711841e655def080044768452b60f4263d0', name: 'petercrouch' }, //prelaunch
     { address: '0xee50a31c3f5a7c77824b12a941a54388a2827ed6', name: '0xafEe', category: 'HighTech'  }, 
