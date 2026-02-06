@@ -1,4 +1,4 @@
-import { ENV, isUpDownTrader, getTraderName, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade, shouldProcess1HourUpDownTrade } from '../config/env';
+import { ENV, isUpDownTrader, getTraderName, getTraderCategory, UPDOWN_STALENESS_THRESHOLD_SECONDS, shouldProcess15MinUpDownTrade, shouldProcess1HourUpDownTrade } from '../config/env';
 import { isDatabaseAvailable } from '../config/db';
 import { getUserActivityModel, getUserPositionModel } from '../models/userHistory';
 import fetchData from '../utils/fetchData';
@@ -27,6 +27,17 @@ const loggedSkipped1HourTrades = new Set<string>();
 const getStaleTradeLogKey = (address: string, activity: UserActivityInterface): string => {
     const hourTimestamp = Math.floor(activity.timestamp / 3600) * 3600; // Round to hour
     return `${address}:${activity.conditionId}:${activity.type}:${hourTimestamp}`;
+};
+
+/**
+ * Format trader name with category for display in logs
+ * @param address The trader's wallet address
+ * @returns Formatted name like "ComTruise [UpDown]" or just "ComTruise" if no category
+ */
+const formatTraderNameWithCategory = (address: string): string => {
+    const name = getTraderName(address);
+    const category = getTraderCategory(address);
+    return category ? `${name} [${category}]` : name;
 };
 
 if (!USER_ADDRESSES || USER_ADDRESSES.length === 0) {
@@ -178,7 +189,7 @@ const processTrader = async (
     
     // Check if this is an UpDown trader (short-term crypto price predictions)
     const isUpDown = isUpDownTrader(address);
-    const traderName = getTraderName(address);
+    const traderName = formatTraderNameWithCategory(address);
 
     // Process each activity
     for (const activity of activities) {

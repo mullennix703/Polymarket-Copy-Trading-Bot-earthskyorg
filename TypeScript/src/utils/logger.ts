@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
-import { formatAddressWithName } from '../config/env';
+import { formatAddressWithName, getTraderName, getTraderCategory } from '../config/env';
 
 class Logger {
     private static logsDir = path.join(process.cwd(), 'logs');
@@ -77,7 +77,9 @@ class Logger {
     }
 
     private static formatTraderAddress(address: string): string {
-        return formatAddressWithName(address);
+        const baseFormat = formatAddressWithName(address);
+        const category = getTraderCategory(address);
+        return category ? `${baseFormat} [${category}]` : baseFormat;
     }
 
     private static maskAddress(address: string): string {
