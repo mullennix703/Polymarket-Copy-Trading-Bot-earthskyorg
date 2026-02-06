@@ -10,7 +10,7 @@ dotenv.config();
 interface TraderInfo {
     address: string;
     name: string;
-    category?: 'UpDown' | 'Politics' | 'Sports' | 'Weather'| 'HighTech'| 'Finance'  | 'Other';
+    category?: 'UpDown' | 'Politics' | 'Sports' | 'Weather'| 'HighTech'| 'Finance'  | 'Other'| 'Elon';
 }
 
 const KNOWN_TRADERS_INFO: TraderInfo[] = [
@@ -21,7 +21,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x20d6436849f930584892730c7f96ebb2ac763856', name: '0x20D6436849F930584892730C7F96eBB2Ac763856-1768642056357', category: 'Sports' },
     { address: '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', name: 'Car' },
     { address: '0xb2caffc47672b897121b4f4a5dbe1ee75fbf0ac2', name: 'EveryMoleIsMagic' },
-    { address: '0x689ae12e11aa489adb3605afd8f39040ff52779e', name: 'Annica' },
+    { address: '0x689ae12e11aa489adb3605afd8f39040ff52779e', name: 'Annica', category: 'Elon'  },
     { address: '0xd218e474776403a330142299f7796e8ba32eb5c9', name: 'cigarettes', category: 'Sports'  },
     { address: '0xfb81f27f1c8758d477332f8e751322c424da1cf3', name: 'CiderApple' },
     { address: '0xa3e9a711841e655def080044768452b60f4263d0', name: 'petercrouch' }, //prelaunch
