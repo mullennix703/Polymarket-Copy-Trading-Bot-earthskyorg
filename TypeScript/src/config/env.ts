@@ -55,7 +55,7 @@ const KNOWN_TRADERS_INFO: TraderInfo[] = [
     { address: '0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1', name: 'aenews2', category: 'Politics' },
     { address: '0x4959175440b8f38229b32f2f036057f6893ea6f5', name: 'Majas' },
     { address: '0x5bffcf561bcae83af680ad600cb99f1184d6ffbe', name: 'YatSen', category: 'Politics' },
-    { address: '0x75e765216a57942d738d880ffcda854d9f869080', name: '25usdc' },
+    { address: '0x75e765216a57942d738d880ffcda854d9f869080', name: '25usdc', category: 'Politics'  },
     { address: '0xd3989ba133ab48b5b3a81e3dba9b37b5966a46d7', name: 'semi', category: 'Politics' },
     { address: '0x9c5455d1ff77d42fd093511a2e3a5d3d53f8a525', name: 'cramschool', category: 'UpDown' },
     { address: '0xf2f6af4f27ec2dcf4072095ab804016e14cd5817', name: 'gopfan2', category: 'Politics' },
