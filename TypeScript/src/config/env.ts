@@ -14,7 +14,8 @@ interface TraderInfo {
 }
 
 const KNOWN_TRADERS_INFO: TraderInfo[] = [
-    { address: '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', name: 'kch123', category: 'Sports' },
+    { address: '0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee', name: '212121212121212121212', category: 'Sports' },
+    { address: '0x1bc0d88ca86b9049cf05d642e634836d5ddf4429', name: 'kch123', category: 'Sports' },
     { address: '0xee00ba338c59557141789b127927a55f5cc5cea1', name: 'S-Works', category: 'Sports' },
     { address: '0x161eb16874e34f545991e774b4e1ac5b65f86ef0', name: 'piston777', category: 'Sports' },
     { address: '0x20d6436849f930584892730c7f96ebb2ac763856', name: '0x20D6436849F930584892730C7F96eBB2Ac763856-1768642056357', category: 'Sports' },
